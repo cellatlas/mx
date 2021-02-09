@@ -6,9 +6,12 @@
 
 struct MX_opt
 {
-    int option1;
+    // view and shape
     std::vector<std::string> files;
     std::string output;
+
+    // sum
+    int axis;
 };
 
 #endif

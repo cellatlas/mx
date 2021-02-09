@@ -60,6 +60,6 @@ void mx_view(const MX_opt &opt)
         std::stringstream ss(line);
         ss >> r.row >> r.col >> r.val;
 
-        std::cout << r.row << ", " << r.col << ", " << r.val << "\n";
+        std::cout << r.row << ' ' << r.col << ' ' << r.val << '\n';
     }
 }

@@ -7,6 +7,7 @@ struct MTXHeader
     int nrows;
     int ncols;
     int nnzero;
+    std::string format;
 };
 
 struct MTXRecord
