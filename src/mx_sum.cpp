@@ -30,6 +30,21 @@ void mx_sum(MX_opt &opt)
 
     float s = r.val;
 
+    // Setup file direction
+    std::streambuf *buf = nullptr;
+    std::ofstream of;
+    if (opt.output.empty())
+    {
+        buf = std::cout.rdbuf();
+    }
+    else
+    {
+        of.open(opt.output);
+        buf = of.rdbuf();
+    }
+    std::ostream outf(buf);
+
+    // loop through file
     while (std::getline(inf, line))
     {
         std::stringstream ss(line);
@@ -40,7 +55,8 @@ void mx_sum(MX_opt &opt)
 
         if (idx[axis] != prev_idx[axis])
         {
-            std::cout << s << '\n';
+            outf << s << '\n';
+            // outf.write((char *)&s, sizeof(s));
             s = 0;
         }
         s += r.val;
@@ -48,5 +64,6 @@ void mx_sum(MX_opt &opt)
         prev_idx = idx;
     }
     // write out the straggler
-    std::cout << s << '\n';
+    outf << s << '\n';
+    // outf.write((char *)&s, sizeof(s));
 }

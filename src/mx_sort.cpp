@@ -5,21 +5,37 @@
 #include <iostream>
 #include <sstream>
 #include <vector>
+#include <functional> // std::function
+#include <algorithm>  // std::sort
+#include <list>
 
-bool cmp_row(MTXRecord &a, MTXRecord &b)
+bool cmp_row(const MTXRecord &a, const MTXRecord &b)
 {
     return (a.row < b.row);
 }
 
-bool cmp_col(MTXRecord &a, MTXRecord &b)
+bool cmp_col(const MTXRecord &a, const MTXRecord &b)
 {
     return (a.col < b.col);
 }
 
+bool cmp_val(const MTXRecord &a, const MTXRecord &b)
+{
+    return (a.val < b.val);
+}
+
 void mx_sort(MX_opt &opt)
 {
-    std::function<bool(MTXRecord, MTXRecord)> cmp[] = {&cmp_row, &cmp_col};
+    int naxis = 3;
+
+    std::function<bool(const MTXRecord &, const MTXRecord &)> cmp[] = {&cmp_row, &cmp_col, &cmp_val};
     int axis = opt.axis;
+    // TODO: get length of cmp
+    if (axis == -1)
+    {
+        // sort by value
+        axis = naxis - 1;
+    }
 
     std::ifstream inf(opt.files[0]);
     MTXHeader header;
@@ -38,34 +54,29 @@ void mx_sort(MX_opt &opt)
 
     std::sort(vec.begin(), vec.end(), cmp[axis]);
 
-    // write the new matrix
-    bool std_out = false;
-    std::ofstream outf;
-    // If there is no output file write to stdout
+    // Setup file direction
+    std::streambuf *buf = nullptr;
+    std::ofstream of;
     if (opt.output.empty())
     {
-        std_out = true;
-        std::cout << header.format << '\n'
-                  << "%\n";
-        std::cout << header.nrows << ' ' << header.ncols << ' ' << header.nnzero << '\n';
+        buf = std::cout.rdbuf();
     }
     else
     {
-        outf.open(opt.output);
-        outf << header.format << '\n'
-             << "%\n";
-        outf << header.nrows << ' ' << header.ncols << ' ' << header.nnzero << '\n';
+        of.open(opt.output);
+        buf = of.rdbuf();
     }
+    std::ostream outf(buf);
 
+    // write the new matrix
+    // header
+    outf << header.format << '\n'
+         << "%\n";
+    outf << header.nrows << ' ' << header.ncols << ' ' << header.nnzero << '\n';
+    // entries
     for (int i = 0; i < vec.size(); i++)
     {
-        if (std_out)
-        {
-            std::cout << vec[i].row << ' ' << vec[i].col << ' ' << vec[i].val << '\n';
-        }
-        else
-        {
-            outf << vec[i].row << ' ' << vec[i].col << ' ' << vec[i].val << '\n';
-        }
+
+        outf << vec[i].row << ' ' << vec[i].col << ' ' << vec[i].val << '\n';
     }
 }
