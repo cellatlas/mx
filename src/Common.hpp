@@ -6,6 +6,8 @@
 
 struct MX_opt
 {
+    //
+    bool stream_in, stream_out;
     // view and shape
     std::vector<std::string> files;
     std::string output;

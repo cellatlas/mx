@@ -35,7 +35,7 @@ void mx_extract(MX_opt &opt)
     // Setup file direction
     std::streambuf *buf = nullptr;
     std::ofstream of;
-    if (opt.output.empty())
+    if (opt.stream_out)
     {
         buf = std::cout.rdbuf();
     }
@@ -46,11 +46,13 @@ void mx_extract(MX_opt &opt)
     }
     std::ostream outf(buf);
 
-    // write header
-    outf << header.format << '\n'
-         << "%\n";
-    outf << header.nrows << ' ' << header.ncols << ' ' << header.nnzero << '\n';
-
+    // write header only if writing to file
+    if (!opt.stream_out)
+    {
+        outf << header.format << '\n'
+             << "%\n";
+        outf << header.nrows << ' ' << header.ncols << ' ' << header.nnzero << '\n';
+    }
     std::string line;
     std::unordered_set<int> cols;
 

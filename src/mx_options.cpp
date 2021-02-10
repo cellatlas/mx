@@ -6,11 +6,12 @@ static int verbose_flag;
 
 void parseProgramOptions_view(int argc, char *argv[], MX_opt &opt)
 {
-    const char *optstring = "o:";
+    const char *optstring = "o:p";
     static struct option long_options[] =
         {
             {"verbose", no_argument, &verbose_flag, 1},
             {"output", required_argument, 0, 'o'},
+            {"pipe", no_argument, 0, 'p'},
             {0, 0, 0, 0}};
 
     int c;
@@ -22,6 +23,9 @@ void parseProgramOptions_view(int argc, char *argv[], MX_opt &opt)
         {
         case 'o':
             opt.output = optarg;
+            break;
+        case 'p':
+            opt.stream_out = true;
             break;
         default:
             break;
@@ -36,17 +40,23 @@ void parseProgramOptions_view(int argc, char *argv[], MX_opt &opt)
     while (optind < argc)
     {
         opt.files.push_back(argv[optind++]);
+    }
+
+    if (opt.files.size() == 1 && opt.files[0] == "-")
+    {
+        opt.stream_in = true;
     }
 }
 
 void parseProgramOptions_sum(int argc, char *argv[], MX_opt &opt)
 {
-    const char *optstring = "o:a:";
+    const char *optstring = "o:a:p";
     static struct option long_options[] =
         {
             {"verbose", no_argument, &verbose_flag, 1},
             {"output", required_argument, 0, 'o'},
             {"axis", required_argument, 0, 'a'},
+            {"pipe", no_argument, 0, 'p'},
             {0, 0, 0, 0}};
 
     int c;
@@ -62,6 +72,9 @@ void parseProgramOptions_sum(int argc, char *argv[], MX_opt &opt)
         case 'a':
             opt.axis = atoi(optarg);
             break;
+        case 'p':
+            opt.stream_out = true;
+            break;
         default:
             break;
         }
@@ -76,17 +89,22 @@ void parseProgramOptions_sum(int argc, char *argv[], MX_opt &opt)
     while (optind < argc)
     {
         opt.files.push_back(argv[optind++]);
+    }
+    if (opt.files.size() == 1 && opt.files[0] == "-")
+    {
+        opt.stream_in = true;
     }
 }
 
 void parseProgramOptions_sort(int argc, char *argv[], MX_opt &opt)
 {
-    const char *optstring = "o:a:";
+    const char *optstring = "o:a:p";
     static struct option long_options[] =
         {
             {"verbose", no_argument, &verbose_flag, 1},
             {"output", required_argument, 0, 'o'},
             {"axis", required_argument, 0, 'a'},
+            {"pipe", no_argument, 0, 'p'},
             {0, 0, 0, 0}};
 
     int c;
@@ -101,6 +119,9 @@ void parseProgramOptions_sort(int argc, char *argv[], MX_opt &opt)
             break;
         case 'a':
             opt.axis = atoi(optarg);
+            break;
+        case 'p':
+            opt.stream_out = true;
             break;
         default:
             break;
@@ -117,6 +138,11 @@ void parseProgramOptions_sort(int argc, char *argv[], MX_opt &opt)
     while (optind < argc)
     {
         opt.files.push_back(argv[optind++]);
+    }
+
+    if (opt.files.size() == 1 && opt.files[0] == "-")
+    {
+        opt.stream_in = true;
     }
 }
 
@@ -129,6 +155,7 @@ void parseProgramOptions_extract(int argc, char *argv[], MX_opt &opt)
             {"output", required_argument, 0, 'o'},
             {"axis", required_argument, 0, 'a'},
             {"index", required_argument, 0, 'i'},
+            {"pipe", no_argument, 0, 'p'},
             {0, 0, 0, 0}};
 
     int c;
@@ -147,6 +174,9 @@ void parseProgramOptions_extract(int argc, char *argv[], MX_opt &opt)
         case 'i':
             opt.index = optarg;
             break;
+        case 'p':
+            opt.stream_out = true;
+            break;
         default:
             break;
         }
@@ -160,5 +190,9 @@ void parseProgramOptions_extract(int argc, char *argv[], MX_opt &opt)
     while (optind < argc)
     {
         opt.files.push_back(argv[optind++]);
+    }
+    if (opt.files.size() == 1 && opt.files[0] == "-")
+    {
+        opt.stream_in = true;
     }
 }

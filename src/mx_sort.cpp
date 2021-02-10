@@ -70,7 +70,7 @@ void mx_sort(MX_opt &opt)
     // Setup file direction
     std::streambuf *buf = nullptr;
     std::ofstream of;
-    if (opt.output.empty())
+    if (opt.stream_out)
     {
         buf = std::cout.rdbuf();
     }
@@ -86,6 +86,7 @@ void mx_sort(MX_opt &opt)
     outf << header.format << '\n'
          << "%\n";
     outf << header.nrows << ' ' << header.ncols << ' ' << header.nnzero << '\n';
+
     // entries
     for (int i = 0; i < vec.size(); i++)
     {

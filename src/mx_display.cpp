@@ -22,6 +22,7 @@ void displayProgramOptions_view()
               << std::endl
               << "Options:" << std::endl
               << "-o, --output      File for output" << std::endl
+              << "-p, --pipe        Pipe output to standard out" << std::endl
               << std::endl;
 }
 
@@ -31,6 +32,7 @@ void displayProgramOptions_shape()
               << std::endl
               << "Options:" << std::endl
               << "-o, --output      File for output" << std::endl
+              << "-p, --pipe        Pipe output to standard out" << std::endl
               << std::endl;
 }
 
@@ -41,6 +43,7 @@ void displayProgramOptions_sum()
               << "Options:" << std::endl
               << "-o, --output          File for output" << std::endl
               << "-a, --axis=<integer>  Axis along which to sum" << std::endl
+              << "-p, --pipe            Pipe output to standard out" << std::endl
               << std::endl;
 }
 
@@ -51,6 +54,7 @@ void displayProgramOptions_sort()
               << "Options:" << std::endl
               << "-o, --output          File for output" << std::endl
               << "-a, --axis=<integer>  Axis along which to sort" << std::endl
+              << "-p, --pipe            Pipe output to standard out" << std::endl
               << std::endl;
 }
 
@@ -63,5 +67,6 @@ void displayProgramOptions_extract()
               << "-a, --axis=<int>      Axis along which to extract" << std::endl
               << "-i, --index=<int-int> Indices to slice, left closed right open interval" << std::endl
               << "                      e.g. one of [0, -3, 1-, 2-5]" << std::endl
+              << "-p, --pipe            Pipe output to standard out" << std::endl
               << std::endl;
 }

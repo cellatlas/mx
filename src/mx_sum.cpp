@@ -33,7 +33,7 @@ void mx_sum(MX_opt &opt)
     // Setup file direction
     std::streambuf *buf = nullptr;
     std::ofstream of;
-    if (opt.output.empty())
+    if (opt.stream_out)
     {
         buf = std::cout.rdbuf();
     }
