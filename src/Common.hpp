@@ -12,6 +12,13 @@ struct MX_opt
 
     // sum
     int axis;
+
+    // extract
+    std::string index;
+    std::pair<int, int> range;
+    std::vector<int> elements;
+
+    MX_opt() : axis(0){};
 };
 
 #endif

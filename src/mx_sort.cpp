@@ -7,7 +7,6 @@
 #include <vector>
 #include <functional> // std::function
 #include <algorithm>  // std::sort
-#include <list>
 
 bool cmp_row(const MTXRecord &a, const MTXRecord &b)
 {

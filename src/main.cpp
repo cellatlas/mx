@@ -2,10 +2,12 @@
 
 // Program options
 #include "mx_options.h"
+#include "mx_validate.h"
 
-#include "mx_view.h" // mx_view
-#include "mx_sum.h"  // mx_sum
-#include "mx_sort.h" // mx_sort
+#include "mx_view.h"    // mx_view
+#include "mx_sum.h"     // mx_sum
+#include "mx_sort.h"    // mx_sort
+#include "mx_extract.h" // mx_extract
 
 #include <stdlib.h>
 #include <getopt.h>
@@ -45,6 +47,18 @@ int main(int argc, char *argv[])
     {
         parseProgramOptions_sum(argc - 1, argv + 1, opt);
         mx_sum(opt);
+    }
+    else if (cmd == "extract")
+    {
+        parseProgramOptions_extract(argc - 1, argv + 1, opt);
+        if (validateProgramOptions_extract(opt))
+        {
+            mx_extract(opt);
+        }
+        else
+        {
+            exit(1);
+        }
     }
     else
     {
