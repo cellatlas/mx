@@ -10,12 +10,26 @@
 
 bool cmp_row(const MTXRecord &a, const MTXRecord &b)
 {
-    return (a.row < b.row);
+    if (a.row == b.row)
+    {
+        return (a.col < b.col);
+    }
+    else
+    {
+        return (a.row < b.row);
+    }
 }
 
 bool cmp_col(const MTXRecord &a, const MTXRecord &b)
 {
-    return (a.col < b.col);
+    if (a.col == b.col)
+    {
+        return (a.row < b.row);
+    }
+    else
+    {
+        return (a.col < b.col);
+    }
 }
 
 bool cmp_val(const MTXRecord &a, const MTXRecord &b)
