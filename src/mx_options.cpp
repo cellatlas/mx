@@ -23,8 +23,6 @@ void parseProgramOptions_view(int argc, char *argv[], MX_opt &opt)
         case 'o':
             opt.output = optarg;
             break;
-        case '?':
-            std::cout << "error" << std::endl;
         default:
             break;
         }
@@ -35,12 +33,9 @@ void parseProgramOptions_view(int argc, char *argv[], MX_opt &opt)
     }
 
     // the rest of the arguments are files
-    if (optind < argc)
+    while (optind < argc)
     {
-        while (optind < argc)
-        {
-            opt.files.push_back(argv[optind++]);
-        }
+        opt.files.push_back(argv[optind++]);
     }
 }
 
@@ -67,8 +62,6 @@ void parseProgramOptions_sum(int argc, char *argv[], MX_opt &opt)
         case 'a':
             opt.axis = atoi(optarg);
             break;
-        case '?':
-            std::cout << "error" << std::endl;
         default:
             break;
         }
@@ -79,12 +72,10 @@ void parseProgramOptions_sum(int argc, char *argv[], MX_opt &opt)
     }
 
     // the rest of the arguments are files
-    if (optind < argc)
+
+    while (optind < argc)
     {
-        while (optind < argc)
-        {
-            opt.files.push_back(argv[optind++]);
-        }
+        opt.files.push_back(argv[optind++]);
     }
 }
 
@@ -111,24 +102,21 @@ void parseProgramOptions_sort(int argc, char *argv[], MX_opt &opt)
         case 'a':
             opt.axis = atoi(optarg);
             break;
-        case '?':
-            std::cout << "error" << std::endl;
         default:
             break;
         }
     }
+
     if (verbose_flag)
     {
         std::cout << "Verbose flag is set" << std::endl;
     }
 
     // the rest of the arguments are files
-    if (optind < argc)
+
+    while (optind < argc)
     {
-        while (optind < argc)
-        {
-            opt.files.push_back(argv[optind++]);
-        }
+        opt.files.push_back(argv[optind++]);
     }
 }
 
@@ -159,8 +147,6 @@ void parseProgramOptions_extract(int argc, char *argv[], MX_opt &opt)
         case 'i':
             opt.index = optarg;
             break;
-        case '?':
-            std::cout << "error" << std::endl;
         default:
             break;
         }
@@ -171,11 +157,8 @@ void parseProgramOptions_extract(int argc, char *argv[], MX_opt &opt)
     }
 
     // the rest of the arguments are files
-    if (optind < argc)
+    while (optind < argc)
     {
-        while (optind < argc)
-        {
-            opt.files.push_back(argv[optind++]);
-        }
+        opt.files.push_back(argv[optind++]);
     }
 }

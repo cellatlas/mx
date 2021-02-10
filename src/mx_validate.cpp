@@ -6,15 +6,18 @@
 
 bool validateProgramOptions_view(MX_opt &opt)
 {
-    return true;
+    bool ret = true;
+    return ret;
 }
 bool validateProgramOptions_sum(MX_opt &opt)
 {
-    return true;
+    bool ret = true;
+    return ret;
 }
 bool validateProgramOptions_sort(MX_opt &opt)
 {
-    return true;
+    bool ret = true;
+    return ret;
 }
 
 bool validateProgramOptions_extract(MX_opt &opt)
