@@ -5,7 +5,7 @@
 #include <iostream>
 #include <fstream>
 
-void parseHeader(std::ifstream &inf, MTXHeader &header)
+void parseHeader(std::istream &inf, MTXHeader &header)
 {
     std::string line;
     int nl = 0;

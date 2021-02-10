@@ -8,10 +8,24 @@
 #include <unordered_set>
 
 // TODO update the header with new nrows/ncols/nzeros
+// extract requires the header to be fixed
 void mx_extract(MX_opt &opt)
 {
     // must be sorted by axis
-    std::ifstream inf(opt.files[0]);
+    // Setup file direction in
+    std::streambuf *inbuf = nullptr;
+    std::ifstream infstream;
+    if (opt.stream_in)
+    {
+        inbuf = std::cin.rdbuf();
+    }
+    else
+    {
+        infstream.open(opt.files[0]); // only does the first file
+        inbuf = infstream.rdbuf();
+    }
+    std::istream inf(inbuf);
+
     int axis = opt.axis;
 
     MTXHeader header;

@@ -24,7 +24,19 @@ void mx_shape(const MX_opt &opt)
     // loop through the input files
     for (int i = 0; i < opt.files.size(); i++)
     {
-        std::ifstream inf(opt.files[i]);
+        // Setup file direction in
+        std::streambuf *inbuf = nullptr;
+        std::ifstream infstream;
+        if (opt.stream_in)
+        {
+            inbuf = std::cin.rdbuf();
+        }
+        else
+        {
+            infstream.open(opt.files[i]); // only does the first file
+            inbuf = infstream.rdbuf();
+        }
+        std::istream inf(inbuf);
         MTXHeader header;
 
         // Parse header
@@ -52,8 +64,19 @@ void mx_view(const MX_opt &opt)
 
     for (int i = 0; i < opt.files.size(); i++)
     {
-
-        std::ifstream inf(opt.files[i]);
+        // Setup file direction in
+        std::streambuf *inbuf = nullptr;
+        std::ifstream infstream;
+        if (opt.stream_in)
+        {
+            inbuf = std::cin.rdbuf();
+        }
+        else
+        {
+            infstream.open(opt.files[i]);
+            inbuf = infstream.rdbuf();
+        }
+        std::istream inf(inbuf);
         MTXHeader header;
 
         // Parse header

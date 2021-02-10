@@ -17,6 +17,6 @@ struct MTXRecord
     float val;
 };
 
-void parseHeader(std::ifstream &inf, MTXHeader &header);
+void parseHeader(std::istream &inf, MTXHeader &header);
 
 #endif

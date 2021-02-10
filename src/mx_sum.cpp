@@ -9,7 +9,20 @@
 
 void mx_sum(MX_opt &opt)
 {
-    std::ifstream inf(opt.files[0]);
+    // Setup file direction in
+    std::streambuf *inbuf = nullptr;
+    std::ifstream infstream;
+    if (opt.stream_in)
+    {
+        inbuf = std::cin.rdbuf();
+    }
+    else
+    {
+        infstream.open(opt.files[0]); // only does the first file
+        inbuf = infstream.rdbuf();
+    }
+    std::istream inf(inbuf);
+
     MTXHeader header;
     parseHeader(inf, header);
 
@@ -30,7 +43,7 @@ void mx_sum(MX_opt &opt)
 
     float s = r.val;
 
-    // Setup file direction
+    // Setup file direction out
     std::streambuf *buf = nullptr;
     std::ofstream of;
     if (opt.stream_out)

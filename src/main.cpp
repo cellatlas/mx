@@ -30,6 +30,9 @@ in mx_validate.cpp and mx_validate.h add validateProgramOptions_subcmd()
 in main.cpp add an if statement for the subcmd
 */
 
+// TODO: fix input subcommands taking in multiple files
+// vs just stdin, ie clean up code
+
 int main(int argc, char *argv[])
 {
     MX_opt opt;
