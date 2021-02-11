@@ -27,24 +27,25 @@ in main.cpp add #include "mx_subcmd.h" at top
 in mx_display.cpp and mx_display.h add displayProgramOptions_subcmd()
 in mx_options.cpp and mx_options.h add parseProgramOptions_subcmd()
 in mx_validate.cpp and mx_validate.h add validateProgramOptions_subcmd()
-in main.cpp add an if statement for the subcmd
+in main.cpp add subcmd to functions list
 */
 
 // TODO: fix input subcommands taking in multiple files
 // vs just stdin, ie clean up code
 
 // Setting up dictionary for easy command execution
+// in our SubCommands type, we can reference a function by its name
 typedef struct
 {
     std::string subcmd;
-    void (*display)();                      // now in our FunctionMap type, we can reference a function by its name
-    void (*parse)(int, char *[], MX_opt &); // now in our FunctionMap type, we can reference a function by its name
-    bool (*validate)(MX_opt &);             // now in our FunctionMap type, we can reference a function by its name
-    void (*command)(MX_opt &);              // now in our FunctionMap type, we can reference a function by its name
-} FunctionMap;
+    void (*display)();
+    void (*parse)(int, char *[], MX_opt &);
+    bool (*validate)(MX_opt &);
+    void (*command)(MX_opt &);
+} SubCommands;
 
 const int function_count = 5;
-const FunctionMap functions[function_count]{
+const SubCommands functions[function_count]{
     {"view", displayProgramOptions_view, parseProgramOptions_view, validateProgramOptions_view, mx_view},
     {"shape", displayProgramOptions_shape, parseProgramOptions_view, validateProgramOptions_view, mx_shape},
     {"sort", displayProgramOptions_sort, parseProgramOptions_sort, validateProgramOptions_sort, mx_sort},
