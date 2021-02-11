@@ -5,7 +5,7 @@
 #include <iostream>
 #include <fstream>
 
-void mx_shape(const MX_opt &opt)
+void mx_shape(MX_opt &opt)
 {
     // If there is no output file write to stdout
     std::streambuf *buf = nullptr;
@@ -46,7 +46,7 @@ void mx_shape(const MX_opt &opt)
     }
 }
 
-void mx_view(const MX_opt &opt)
+void mx_view(MX_opt &opt)
 {
 
     std::streambuf *buf = nullptr;

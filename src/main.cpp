@@ -33,6 +33,25 @@ in main.cpp add an if statement for the subcmd
 // TODO: fix input subcommands taking in multiple files
 // vs just stdin, ie clean up code
 
+// Setting up dictionary for easy command execution
+typedef struct
+{
+    std::string subcmd;
+    void (*display)();                      // now in our FunctionMap type, we can reference a function by its name
+    void (*parse)(int, char *[], MX_opt &); // now in our FunctionMap type, we can reference a function by its name
+    bool (*validate)(MX_opt &);             // now in our FunctionMap type, we can reference a function by its name
+    void (*command)(MX_opt &);              // now in our FunctionMap type, we can reference a function by its name
+} FunctionMap;
+
+const int function_count = 5;
+const FunctionMap functions[function_count]{
+    {"view", displayProgramOptions_view, parseProgramOptions_view, validateProgramOptions_view, mx_view},
+    {"shape", displayProgramOptions_shape, parseProgramOptions_view, validateProgramOptions_view, mx_shape},
+    {"sort", displayProgramOptions_sort, parseProgramOptions_sort, validateProgramOptions_sort, mx_sort},
+    {"sum", displayProgramOptions_sum, parseProgramOptions_sum, validateProgramOptions_sum, mx_sum},
+    {"extract", displayProgramOptions_extract, parseProgramOptions_extract, validateProgramOptions_extract, mx_extract},
+};
+
 int main(int argc, char *argv[])
 {
     MX_opt opt;
@@ -42,101 +61,35 @@ int main(int argc, char *argv[])
         displayProgramOptions_MX();
         exit(0);
     }
-    std::string cmd(argv[1]);
-    // subcommand
-    if (cmd == "view")
-    {
-        if (disp_help)
-        {
-            displayProgramOptions_view();
-            exit(0);
-        }
-        // parse view
-        parseProgramOptions_view(argc - 1, argv + 1, opt);
-        if (validateProgramOptions_view(opt))
-        {
-            mx_view(opt);
-        }
-        else
-        {
-            displayProgramOptions_view();
-            exit(1);
-        }
-    }
-    else if (cmd == "shape")
-    {
-        if (disp_help)
-        {
-            displayProgramOptions_shape();
-            exit(0);
-        }
-        parseProgramOptions_view(argc - 1, argv + 1, opt);
 
-        if (validateProgramOptions_view(opt))
-        {
-            mx_shape(opt);
-        }
-        else
-        {
-            displayProgramOptions_shape();
-            exit(1);
-        }
-    }
-    else if (cmd == "sort")
+    // subcommand
+    std::string cmd(argv[1]);
+    bool command_found = false;
+    for (int nc = 0; nc < function_count; nc++)
     {
-        if (disp_help)
+        if (functions[nc].subcmd == cmd)
         {
-            displayProgramOptions_sort();
-            exit(0);
-        }
-        parseProgramOptions_sort(argc - 1, argv + 1, opt);
-        if (validateProgramOptions_sort(opt))
-        {
-            mx_sort(opt);
-        }
-        else
-        {
-            displayProgramOptions_sort();
-            exit(1);
-        }
-    }
-    else if (cmd == "sum")
-    {
-        if (disp_help)
-        {
-            displayProgramOptions_sum();
-            exit(0);
-        }
-        parseProgramOptions_sum(argc - 1, argv + 1, opt);
-        if (validateProgramOptions_sum(opt))
-        {
-            mx_sum(opt);
-        }
-        else
-        {
-            displayProgramOptions_sum();
-            exit(1);
+            command_found = true;
+            if (disp_help)
+            {
+                functions[nc].display();
+                exit(0);
+            }
+            functions[nc].parse(argc - 1, argv + 1, opt);
+            if (functions[nc].validate(opt))
+            {
+                functions[nc].command(opt);
+                exit(0);
+            }
+            else
+            {
+                functions[nc].display();
+                exit(1);
+            }
+            break;
         }
     }
-    else if (cmd == "extract")
-    {
-        if (disp_help)
-        {
-            displayProgramOptions_extract();
-            exit(0);
-        }
-        parseProgramOptions_extract(argc - 1, argv + 1, opt);
-        if (validateProgramOptions_extract(opt))
-        {
-            mx_extract(opt);
-        }
-        else
-        {
-            displayProgramOptions_extract();
-            exit(1);
-        }
-    }
-    else
+    if (!command_found)
     {
         std::cerr << "mx command not found: " << cmd << std::endl;
         displayProgramOptions_MX();
