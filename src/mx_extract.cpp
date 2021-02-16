@@ -6,6 +6,134 @@
 #include <sstream>
 #include <vector>
 #include <unordered_set>
+#include <utility> // std::pair, std::make_pair
+
+#include "getopt.h"
+
+// display
+void displayProgramOptions_extract()
+{
+    std::cout << "Usage: mx extract [options] mtx-files" << std::endl
+              << std::endl
+              << "Options:" << std::endl
+              << "-o, --output          File for output" << std::endl
+              << "-a, --axis=<int>      Axis along which to extract" << std::endl
+              << "-i, --index=<int-int> Indices to slice, left closed right open interval" << std::endl
+              << "                      e.g. one of [0, -3, 1-, 2-5]" << std::endl
+              << "-p, --pipe            Pipe output to standard out" << std::endl
+              << std::endl;
+}
+
+// parse
+static int verbose_flag;
+
+void parseProgramOptions_extract(int argc, char *argv[], MX_opt &opt)
+{
+    const char *optstring = "o:a:i:";
+    static struct option long_options[] =
+        {
+            {"verbose", no_argument, &verbose_flag, 1},
+            {"output", required_argument, 0, 'o'},
+            {"axis", required_argument, 0, 'a'},
+            {"index", required_argument, 0, 'i'},
+            {"pipe", no_argument, 0, 'p'},
+            {0, 0, 0, 0}};
+
+    int c;
+    int option_index = 0;
+
+    while ((c = getopt_long(argc, argv, optstring, long_options, &option_index)) != -1)
+    {
+        switch (c)
+        {
+        case 'o':
+            opt.output = optarg;
+            break;
+        case 'a':
+            opt.axis = atoi(optarg);
+            break;
+        case 'i':
+            opt.index = optarg;
+            break;
+        case 'p':
+            opt.stream_out = true;
+            break;
+        default:
+            break;
+        }
+    }
+    if (verbose_flag)
+    {
+        std::cout << "Verbose flag is set" << std::endl;
+    }
+
+    // the rest of the arguments are files
+    while (optind < argc)
+    {
+        opt.files.push_back(argv[optind++]);
+    }
+    if (opt.files.size() == 1 && opt.files[0] == "-")
+    {
+        opt.stream_in = true;
+    }
+}
+
+// validate
+bool validateProgramOptions_extract(MX_opt &opt)
+{
+    bool ret = true;
+
+    if (opt.index.empty())
+    {
+        ret = false;
+        std::cerr << "[error] no index specified" << std::endl;
+    }
+    else
+    {
+        char delimiter = '-';
+        size_t pos = opt.index.find(delimiter);
+        int lower, upper;
+
+        // if delimiter not found
+        if (pos == std::string::npos)
+        {
+            lower = atoi(opt.index.c_str());
+            upper = lower + 1;
+        }
+        else // else split at delimiter and set bounds
+        {
+            if (pos == 0) // - at beginning of string ie "-1432"
+            {
+                lower = 0;
+                upper = atoi(opt.index.substr(pos + 1, opt.index.size()).c_str());
+            }
+            else if (pos == opt.index.size() - 1) // the - is at end of string ie "12-"
+            {
+                lower = atoi(opt.index.substr(0, pos).c_str());
+                upper = -1;
+            }
+            else // the - is in between two numbers 43-100
+            {
+                lower = atoi(opt.index.substr(0, pos).c_str());
+                upper = atoi(opt.index.substr(pos + 1, opt.index.size()).c_str());
+            }
+        }
+
+        if (upper == -1 || lower < upper)
+        {
+            opt.range = std::make_pair(lower, upper);
+            // std::cout << lower << ", " << upper << '\n';
+        }
+        else
+        {
+            std::cerr << "[error] lower must be strictly smaller than upper" << std::endl;
+            ret = false;
+        }
+    }
+    return ret;
+}
+
+// command
 
 // TODO update the header with new nrows/ncols/nzeros
 // extract requires the header to be fixed
