@@ -29,7 +29,7 @@ static int verbose_flag;
 
 void parseProgramOptions_extract(int argc, char *argv[], MX_opt &opt)
 {
-    const char *optstring = "o:a:i:";
+    const char *optstring = "o:a:i:p";
     static struct option long_options[] =
         {
             {"verbose", no_argument, &verbose_flag, 1},
@@ -154,6 +154,20 @@ void mx_extract(MX_opt &opt)
     }
     std::istream inf(inbuf);
 
+    // Setup file direction out
+    std::streambuf *buf = nullptr;
+    std::ofstream of;
+    if (opt.stream_out)
+    {
+        buf = std::cout.rdbuf();
+    }
+    else
+    {
+        of.open(opt.output);
+        buf = of.rdbuf();
+    }
+    std::ostream outf(buf);
+
     int axis = opt.axis;
 
     MTXHeader header;
@@ -174,27 +188,9 @@ void mx_extract(MX_opt &opt)
             upper = header.ncols;
         }
     }
-    // Setup file direction
-    std::streambuf *buf = nullptr;
-    std::ofstream of;
-    if (opt.stream_out)
-    {
-        buf = std::cout.rdbuf();
-    }
-    else
-    {
-        of.open(opt.output);
-        buf = of.rdbuf();
-    }
-    std::ostream outf(buf);
 
-    // write header only if writing to file
-    if (!opt.stream_out)
-    {
-        outf << header.format << '\n'
-             << "%\n";
-        outf << header.nrows << ' ' << header.ncols << ' ' << header.nnzero << '\n';
-    }
+    // TODO write header later
+    writeHeader(outf, header);
     std::string line;
     std::unordered_set<int> cols;
 

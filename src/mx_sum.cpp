@@ -94,6 +94,20 @@ void mx_sum(MX_opt &opt)
     }
     std::istream inf(inbuf);
 
+    // Setup file direction out
+    std::streambuf *buf = nullptr;
+    std::ofstream of;
+    if (opt.stream_out)
+    {
+        buf = std::cout.rdbuf();
+    }
+    else
+    {
+        of.open(opt.output);
+        buf = of.rdbuf();
+    }
+    std::ostream outf(buf);
+
     MTXHeader header;
     parseHeader(inf, header);
 
@@ -113,20 +127,6 @@ void mx_sum(MX_opt &opt)
     std::vector<int> prev_idx = idx;
 
     float s = r.val;
-
-    // Setup file direction out
-    std::streambuf *buf = nullptr;
-    std::ofstream of;
-    if (opt.stream_out)
-    {
-        buf = std::cout.rdbuf();
-    }
-    else
-    {
-        of.open(opt.output);
-        buf = of.rdbuf();
-    }
-    std::ostream outf(buf);
 
     // loop through file
     while (std::getline(inf, line))

@@ -20,7 +20,10 @@ struct MX_opt
     std::pair<int, int> range;
     std::vector<int> elements;
 
-    MX_opt() : axis(0){};
+    // sample
+    int k_samples;
+
+    MX_opt() : axis(0), k_samples(1){};
 };
 
 #endif

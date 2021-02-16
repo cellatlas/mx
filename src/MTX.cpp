@@ -25,3 +25,10 @@ void parseHeader(std::istream &inf, MTXHeader &header)
         }
     }
 }
+
+void writeHeader(std::ostream &outf, MTXHeader &header)
+{
+    outf << header.format << '\n'
+         << "%\n";
+    outf << header.nrows << ' ' << header.ncols << ' ' << header.nnzero << '\n';
+}

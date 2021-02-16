@@ -4,6 +4,7 @@
 #include <fstream>
 #include <sstream>
 #include <iostream>
+#include <random>
 
 #include "getopt.h"
 
@@ -13,9 +14,10 @@ void displayProgramOptions_sample()
     std::cout << "Usage: mx sample [options] mtx-files" << std::endl
               << std::endl
               << "Options:" << std::endl
-              << "-o, --output          File for output" << std::endl
-              << "-a, --axis=<integer>  Axis along which to sort" << std::endl
-              << "-p, --pipe            Pipe output to standard out" << std::endl
+              << "-o, --output              File for output" << std::endl
+              << "-a, --axis=<integer>      Axis along which to sample" << std::endl
+              << "-k, --ksamples=<integer>  Number of elements to sample" << std::endl
+              << "-p, --pipe                Pipe output to standard out" << std::endl
               << std::endl;
 }
 
@@ -24,13 +26,14 @@ static int verbose_flag;
 
 void parseProgramOptions_sample(int argc, char *argv[], MX_opt &opt)
 {
-    const char *optstring = "o:a:p";
+    const char *optstring = "o:a:pk:";
     static struct option long_options[] =
         {
             {"verbose", no_argument, &verbose_flag, 1},
             {"output", required_argument, 0, 'o'},
             {"axis", required_argument, 0, 'a'},
             {"pipe", no_argument, 0, 'p'},
+            {"ksamples", required_argument, 0, 'k'},
             {0, 0, 0, 0}};
 
     int c;
@@ -48,6 +51,9 @@ void parseProgramOptions_sample(int argc, char *argv[], MX_opt &opt)
             break;
         case 'p':
             opt.stream_out = true;
+            break;
+        case 'k':
+            opt.k_samples = atoi(optarg);
             break;
         default:
             break;
@@ -99,6 +105,10 @@ void mx_sample(MX_opt &opt)
     }
     std::istream inf(inbuf);
 
+    // perform the sampling
+    MTXHeader header; // defaults set in MTX.h
+    parseHeader(inf, header);
+
     // Setup file direction OUT
     std::streambuf *buf = nullptr;
     std::ofstream of;
@@ -113,16 +123,48 @@ void mx_sample(MX_opt &opt)
     }
     std::ostream outf(buf);
 
-    // perform the sampling
-    MTXHeader header;
-    parseHeader(inf, header);
-
     MTXRecord r;
     std::string line;
+
+    MTXRecord *buffer = new MTXRecord[opt.k_samples]; // dynamically allocated
+    int nr = 0;
+
+    std::random_device dev;
+    std::mt19937 rng(dev());
+    std::uniform_int_distribution<std::mt19937::result_type> rd_idx(0, opt.k_samples - 1); // [0, k-1] random index
 
     while (std::getline(inf, line))
     {
         std::stringstream ss(line);
         ss >> r.row >> r.col >> r.val;
+
+        // place first k records into buffer
+        if (nr < opt.k_samples)
+        {
+            buffer[nr] = r;
+        }
+        else
+        {
+            std::uniform_int_distribution<std::mt19937::result_type> dist(0, nr); // distribution in range [0, nr]
+            // determine if random number generator is between [0, k) (replace) or [k, i) (dont replace)
+            if (dist(rng) < opt.k_samples)
+            {
+                buffer[rd_idx(rng)] = r;
+            }
+        }
+        nr++;
     }
+
+    // TODO fix header
+    // write the new matrix
+    // header
+
+    writeHeader(outf, header);
+
+    for (int i = 0; i < opt.k_samples; i++)
+    {
+        outf << buffer[i].row << ' ' << buffer[i].col << ' ' << buffer[i].val << '\n';
+    }
+
+    delete[] buffer;
 }

@@ -118,7 +118,6 @@ void mx_shape(MX_opt &opt)
 
         // Parse header
         parseHeader(inf, header);
-
         outf << header.nrows << "\t" << header.ncols << "\t" << header.nnzero << std::endl;
     }
 }
@@ -159,10 +158,7 @@ void mx_view(MX_opt &opt)
         // Parse header
         parseHeader(inf, header);
 
-        // header
-        outf << header.format << '\n'
-             << "%\n";
-        outf << header.nrows << ' ' << header.ncols << ' ' << header.nnzero << '\n';
+        writeHeader(outf, header);
 
         // Parse the rest of the matrix
         std::string line;

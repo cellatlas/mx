@@ -113,17 +113,6 @@ bool cmp_val(const MTXRecord &a, const MTXRecord &b)
 
 void mx_sort(MX_opt &opt)
 {
-    int naxis = 3;
-
-    std::function<bool(const MTXRecord &, const MTXRecord &)> cmp[] = {&cmp_row, &cmp_col, &cmp_val};
-    int axis = opt.axis;
-    // TODO: get length of cmp
-    if (axis == -1)
-    {
-        // sort by value
-        axis = naxis - 1;
-    }
-
     // Setup file direction in
     std::streambuf *inbuf = nullptr;
     std::ifstream infstream;
@@ -137,6 +126,31 @@ void mx_sort(MX_opt &opt)
         inbuf = infstream.rdbuf();
     }
     std::istream inf(inbuf);
+
+    // Setup file direction out
+    std::streambuf *buf = nullptr;
+    std::ofstream of;
+    if (opt.stream_out)
+    {
+        buf = std::cout.rdbuf();
+    }
+    else
+    {
+        of.open(opt.output);
+        buf = of.rdbuf();
+    }
+    std::ostream outf(buf);
+
+    int naxis = 3;
+
+    std::function<bool(const MTXRecord &, const MTXRecord &)> cmp[] = {&cmp_row, &cmp_col, &cmp_val};
+    int axis = opt.axis;
+    // TODO: get length of cmp
+    if (axis == -1)
+    {
+        // sort by value
+        axis = naxis - 1;
+    }
 
     MTXHeader header;
     parseHeader(inf, header);
@@ -154,25 +168,7 @@ void mx_sort(MX_opt &opt)
 
     std::sort(vec.begin(), vec.end(), cmp[axis]);
 
-    // Setup file direction
-    std::streambuf *buf = nullptr;
-    std::ofstream of;
-    if (opt.stream_out)
-    {
-        buf = std::cout.rdbuf();
-    }
-    else
-    {
-        of.open(opt.output);
-        buf = of.rdbuf();
-    }
-    std::ostream outf(buf);
-
-    // write the new matrix
-    // header
-    outf << header.format << '\n'
-         << "%\n";
-    outf << header.nrows << ' ' << header.ncols << ' ' << header.nnzero << '\n';
+    writeHeader(outf, header);
 
     // entries
     for (int i = 0; i < vec.size(); i++)

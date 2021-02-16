@@ -64,8 +64,7 @@ typedef struct
     void (*command)(MX_opt &);
 } SubCommands;
 
-const int function_count = 6;
-const SubCommands functions[function_count]{
+const SubCommands functions[]{
     {"view", displayProgramOptions_view, parseProgramOptions_view, validateProgramOptions_view, mx_view},
     {"shape", displayProgramOptions_shape, parseProgramOptions_view, validateProgramOptions_view, mx_shape},
     {"sort", displayProgramOptions_sort, parseProgramOptions_sort, validateProgramOptions_sort, mx_sort},
@@ -73,6 +72,8 @@ const SubCommands functions[function_count]{
     {"extract", displayProgramOptions_extract, parseProgramOptions_extract, validateProgramOptions_extract, mx_extract},
     {"sample", displayProgramOptions_sample, parseProgramOptions_sample, validateProgramOptions_sample, mx_sample},
 };
+
+const int function_count = sizeof(functions) / sizeof(*functions);
 
 int main(int argc, char *argv[])
 {
