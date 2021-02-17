@@ -88,6 +88,8 @@ bool validateProgramOptions_sample(MX_opt &opt)
 
 // here we implement reservoir sampling
 // as described here https://florian.github.io/reservoir-sampling/
+// helpful post on random number generation in cpp
+// https://stackoverflow.com/a/7114482/13731947
 
 void mx_sample(MX_opt &opt)
 {
