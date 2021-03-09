@@ -4,6 +4,8 @@
 #include <vector>
 #include <string>
 
+#define MX_VERSION "0.0.1"
+
 struct MX_opt
 {
     //

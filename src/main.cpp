@@ -34,18 +34,19 @@ in main.cpp add subcmd to functions list
 
 void displayProgramOptions_MX()
 {
-    std::cout << "Usage: mx <CMD> [arguments] ..." << std::endl
+    std::cout << "mx " << MX_VERSION << std::endl
               << std::endl
-              << "Where <CMD> can be one of: " << std::endl
+              << "Usage: mx <cmd> [arguments] ..." << std::endl
+              << "where <cmd> can be one of: " << std::endl
               << std::endl
               << "view              View matrix" << std::endl
-              << "shape             Print shape of matrix" << std::endl
+              << "shape             Print matrix shape" << std::endl
               << "sort              Sort matrix" << std::endl
-              << "sum               Sum elements across axis" << std::endl
-              << "extract           Extract elements across axis" << std::endl
-              << "sample            Sample elements across axis" << std::endl
+              << "sum               Sum elements" << std::endl
+              << "extract           Extract elements" << std::endl
+              << "sample            Sample elements" << std::endl
               << std::endl
-              << "Running mx <CMD> without arguments prints usage information for <CMD>"
+              << "Running mx <cmd> without arguments prints usage information for <cmd>"
               << std::endl
               << std::endl;
 }

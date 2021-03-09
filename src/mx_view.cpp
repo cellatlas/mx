@@ -118,6 +118,7 @@ void mx_shape(MX_opt &opt)
 
         // Parse header
         parseHeader(inf, header);
+        // parseNewHeader(inf, header);
         outf << header.nrows << "\t" << header.ncols << "\t" << header.nnzero << std::endl;
     }
 }
