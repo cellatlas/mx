@@ -69,3 +69,15 @@ void writeHeader(std::ostream &outf, MTXHeader &header)
          << "%\n";
     outf << header.nrows << ' ' << header.ncols << ' ' << header.nnzero << '\n';
 }
+
+void writeRecord(std::ostream &outf, MTXRecord &r)
+{
+    const char delim = ' ';
+    outf << r.row << delim << r.col << delim << r.val << '\n';
+}
+
+void parseRecord(std::string &line, MTXRecord &r)
+{
+    std::stringstream ss(line);
+    ss >> r.row >> r.col >> r.val;
+}

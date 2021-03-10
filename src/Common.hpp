@@ -17,6 +17,12 @@ struct MX_opt
     // sum
     int axis;
 
+    // multiply
+    float value;
+    std::string file;
+    bool inverse;
+
+
     // extract
     std::string index;
     std::pair<int, int> range;
@@ -25,7 +31,7 @@ struct MX_opt
     // sample
     int k_samples;
 
-    MX_opt() : axis(0), k_samples(1){};
+    MX_opt() : axis(0), value(1.0), k_samples(1){};
 };
 
 #endif

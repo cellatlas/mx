@@ -27,5 +27,7 @@ struct MTXRecord
 void parseHeader(std::istream &inf, MTXHeader &header);
 void parseNewHeader(std::istream &inf, MTXHeader &header);
 void writeHeader(std::ostream &outf, MTXHeader &header);
+void writeRecord(std::ostream &outf, MTXRecord &record);
+void parseRecord(std::string &line, MTXRecord &record);
 
 #endif

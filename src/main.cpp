@@ -1,11 +1,12 @@
 #include "Common.hpp" // MX_opt is here
 
 // commands
-#include "mx_view.h"    // mx_view
-#include "mx_sum.h"     // mx_sum
-#include "mx_sort.h"    // mx_sort
-#include "mx_extract.h" // mx_extract
-#include "mx_sample.h"  // mx_sample
+#include "mx_view.h"     // mx_view
+#include "mx_sum.h"      // mx_sum
+#include "mx_sort.h"     // mx_sort
+#include "mx_extract.h"  // mx_extract
+#include "mx_sample.h"   // mx_sample
+#include "mx_multiply.h" // mx_multiply
 
 #include <stdlib.h>
 #include <getopt.h>
@@ -43,6 +44,7 @@ void displayProgramOptions_MX()
               << "shape             Print matrix shape" << std::endl
               << "sort              Sort matrix" << std::endl
               << "sum               Sum elements" << std::endl
+              << "multiply          Multiply elements" << std::endl
               << "extract           Extract elements" << std::endl
               << "sample            Sample elements" << std::endl
               << std::endl
@@ -72,6 +74,7 @@ const SubCommands functions[]{
     {"sum", displayProgramOptions_sum, parseProgramOptions_sum, validateProgramOptions_sum, mx_sum},
     {"extract", displayProgramOptions_extract, parseProgramOptions_extract, validateProgramOptions_extract, mx_extract},
     {"sample", displayProgramOptions_sample, parseProgramOptions_sample, validateProgramOptions_sample, mx_sample},
+    {"multiply", displayProgramOptions_multiply, parseProgramOptions_multiply, validateProgramOptions_multiply, mx_multiply},
 };
 
 const int function_count = sizeof(functions) / sizeof(*functions);
