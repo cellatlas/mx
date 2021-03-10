@@ -173,17 +173,23 @@ void mx_multiply_file(MX_opt &opt)
         std::ifstream fin;
         fin.open(opt.file);
         std::string line;
+        float val;
         while (std::getline(fin, line))
         {
             nf++;
             std::stringstream ss(line);
-            float val;
+            ss >> val;
+
             if (val == 0)
             {
                 std::cerr << "[warning] value equals 0.. setting equal to 1" << std::endl;
                 val = 1;
             }
-            ss >> val;
+
+            if (opt.inverse)
+            {
+                val = 1 / val;
+            }
             q.push(val);
         }
     }
@@ -236,11 +242,7 @@ void mx_multiply_file(MX_opt &opt)
 
     float v = q.front();
     q.pop();
-    // TODO handle when value is 0;
-    if (opt.inverse)
-    {
-        v = 1 / v;
-    }
+
     prev_r.val = prev_r.val * v;
     writeRecord(outf, prev_r);
 
@@ -253,11 +255,6 @@ void mx_multiply_file(MX_opt &opt)
         {
             v = q.front();
             q.pop();
-            // TODO handle when value is 0;
-            if (opt.inverse)
-            {
-                v = 1 / v;
-            }
         }
         curr_r.val = curr_r.val * v;
         writeRecord(outf, curr_r);
