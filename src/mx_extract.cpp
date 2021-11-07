@@ -7,6 +7,7 @@
 #include <vector>
 #include <unordered_set>
 #include <utility> // std::pair, std::make_pair
+#include <unordered_map>
 
 #include "getopt.h"
 
@@ -20,6 +21,7 @@ void displayProgramOptions_extract()
               << "-a, --axis=<int>      Axis along which to extract" << std::endl
               << "-i, --index=<int-int> Indices to slice, left closed right open interval" << std::endl
               << "                      e.g. one of [0, -3, 1-, 2-5]" << std::endl
+              << "-f, --file            single column file" << std::endl
               << "-p, --pipe            Pipe output to standard out" << std::endl
               << std::endl;
 }
@@ -29,13 +31,14 @@ static int verbose_flag;
 
 void parseProgramOptions_extract(int argc, char *argv[], MX_opt &opt)
 {
-    const char *optstring = "o:a:i:p";
+    const char *optstring = "o:a:i:f:p";
     static struct option long_options[] =
         {
             {"verbose", no_argument, &verbose_flag, 1},
             {"output", required_argument, 0, 'o'},
             {"axis", required_argument, 0, 'a'},
             {"index", required_argument, 0, 'i'},
+            {"file", optional_argument, 0, 'f'},
             {"pipe", no_argument, 0, 'p'},
             {0, 0, 0, 0}};
 
@@ -54,6 +57,9 @@ void parseProgramOptions_extract(int argc, char *argv[], MX_opt &opt)
             break;
         case 'i':
             opt.index = optarg;
+            break;
+        case 'f':
+            opt.file = optarg;
             break;
         case 'p':
             opt.stream_out = true;
@@ -85,49 +91,61 @@ bool validateProgramOptions_extract(MX_opt &opt)
 
     if (opt.index.empty())
     {
-        ret = false;
-        std::cerr << "[error] no index specified" << std::endl;
+        if (opt.file.empty())
+        {
+            ret = false;
+            std::cerr << "[error] no index or file specified" << std::endl;
+        }
     }
     else
     {
-        char delimiter = '-';
-        size_t pos = opt.index.find(delimiter);
-        int lower, upper;
-
-        // if delimiter not found
-        if (pos == std::string::npos)
+        if (!opt.file.empty())
         {
-            lower = atoi(opt.index.c_str());
-            upper = lower + 1;
-        }
-        else // else split at delimiter and set bounds
-        {
-            if (pos == 0) // - at beginning of string ie "-1432"
-            {
-                lower = 0;
-                upper = atoi(opt.index.substr(pos + 1, opt.index.size()).c_str());
-            }
-            else if (pos == opt.index.size() - 1) // the - is at end of string ie "12-"
-            {
-                lower = atoi(opt.index.substr(0, pos).c_str());
-                upper = -1;
-            }
-            else // the - is in between two numbers 43-100
-            {
-                lower = atoi(opt.index.substr(0, pos).c_str());
-                upper = atoi(opt.index.substr(pos + 1, opt.index.size()).c_str());
-            }
-        }
-
-        if (upper == -1 || lower < upper)
-        {
-            opt.range = std::make_pair(lower, upper);
-            // std::cout << lower << ", " << upper << '\n';
+            ret = false;
+            std::cerr << "[error] cannot specify index and file" << std::endl;
         }
         else
         {
-            std::cerr << "[error] lower must be strictly smaller than upper" << std::endl;
-            ret = false;
+
+            char delimiter = '-';
+            size_t pos = opt.index.find(delimiter);
+            int lower, upper;
+
+            // if delimiter not found
+            if (pos == std::string::npos)
+            {
+                lower = atoi(opt.index.c_str());
+                upper = lower + 1;
+            }
+            else // else split at delimiter and set bounds
+            {
+                if (pos == 0) // - at beginning of string ie "-1432"
+                {
+                    lower = 0;
+                    upper = atoi(opt.index.substr(pos + 1, opt.index.size()).c_str());
+                }
+                else if (pos == opt.index.size() - 1) // the - is at end of string ie "12-"
+                {
+                    lower = atoi(opt.index.substr(0, pos).c_str());
+                    upper = -1;
+                }
+                else // the - is in between two numbers 43-100
+                {
+                    lower = atoi(opt.index.substr(0, pos).c_str());
+                    upper = atoi(opt.index.substr(pos + 1, opt.index.size()).c_str());
+                }
+            }
+
+            if (upper == -1 || lower < upper)
+            {
+                opt.range = std::make_pair(lower, upper);
+                // std::cout << lower << ", " << upper << '\n';
+            }
+            else
+            {
+                std::cerr << "[error] lower must be strictly smaller than upper" << std::endl;
+                ret = false;
+            }
         }
     }
     return ret;
@@ -135,9 +153,7 @@ bool validateProgramOptions_extract(MX_opt &opt)
 
 // command
 
-// TODO update the header with new nrows/ncols/nzeros
-// extract requires the header to be fixed
-void mx_extract(MX_opt &opt)
+void mx_extract_file(MX_opt &opt)
 {
     // must be sorted by axis
     // Setup file direction in
@@ -168,6 +184,101 @@ void mx_extract(MX_opt &opt)
     }
     std::ostream outf(buf);
 
+    //////////////////
+    int axis = opt.axis;
+
+    MTXHeader header;
+    MTXRecord rp, r; // rp = r previous
+
+    parseHeader(inf, header);
+
+    // read in file indices
+    std::unordered_map<int32_t, int32_t> extractList;
+    parseExtractList(opt.file, extractList);
+    // printExtractList(extractList);
+
+    // TODO write header later
+    writeHeader(outf, header);
+    std::string line;
+    std::unordered_set<int> cols;
+
+    // get the first line
+    // parseRecord(line, rp);
+
+    // get the rest of the lines
+    // make a record buffer so for all elements in the buffer (row / col) you can read and write them
+    int N = 100;
+    MTXRecord *p = new MTXRecord[N];
+
+    // initial record (rp)
+    std::getline(inf, line);
+    parseRecord(line, rp);
+    while (std::getline(inf, line))
+    {
+
+        // new record
+        // std::getline(inf, line);
+        parseRecord(line, r);
+        // printRecord(rp);
+        // printRecord(r);
+
+        // search for rp
+        auto it = extractList.find(rp.row);
+        if (it == extractList.end())
+        {
+            // std::cout << rp.row << ", not found" << std::endl;
+        }
+        else
+        {
+            // if it exists, write it
+            writeRecord(outf, rp);
+            while (rp.row == r.row)
+            {
+                // if rp.row == r.row continue to write r
+                writeRecord(outf, r);
+                rp = r;
+                std::getline(inf, line);
+                parseRecord(line, r);
+            }
+        }
+        rp = r;
+    }
+
+    // fix the header
+}
+
+void mx_extract_index(MX_opt &opt)
+{
+    // must be sorted by axis
+    // Setup file direction in
+    std::streambuf *inbuf = nullptr;
+    std::ifstream infstream;
+    if (opt.stream_in)
+    {
+        inbuf = std::cin.rdbuf();
+    }
+    else
+    {
+        infstream.open(opt.files[0]); // only does the first file
+        inbuf = infstream.rdbuf();
+    }
+    std::istream inf(inbuf);
+
+    // Setup file direction out
+    std::streambuf *buf = nullptr;
+    std::ofstream of;
+    if (opt.stream_out)
+    {
+        buf = std::cout.rdbuf();
+    }
+    else
+    {
+        of.open(opt.output);
+        buf = of.rdbuf();
+    }
+    std::ostream outf(buf);
+
+    ///////////////////
     int axis = opt.axis;
 
     MTXHeader header;
@@ -256,4 +367,18 @@ void mx_extract(MX_opt &opt)
     // std::cout << vsize[axis] << ", " << vsize[((1 + axis) % 2)] << ", " << vsize[vsize.size() - 1] << std::endl;
 
     // fix the header
+}
+
+// TODO update the header with new nrows/ncols/nzeros
+// extract requires the header to be fixed
+void mx_extract(MX_opt &opt)
+{
+    if (!opt.index.empty())
+    {
+        mx_extract_index(opt);
+    }
+    else if (!opt.file.empty())
+    {
+        mx_extract_file(opt);
+    }
 }

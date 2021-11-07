@@ -10,18 +10,18 @@ struct MX_opt
 {
     //
     bool stream_in, stream_out;
+
     // view and shape
     std::vector<std::string> files;
     std::string output;
 
     // sum
-    int axis;
+    int axis = 0;
 
     // multiply
     float value;
     std::string file;
     bool inverse;
-
 
     // extract
     std::string index;

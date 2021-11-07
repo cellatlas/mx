@@ -16,7 +16,7 @@ void displayProgramOptions_sort()
               << std::endl
               << "Options:" << std::endl
               << "-o, --output          File for output" << std::endl
-              << "-a, --axis=<integer>  Axis along which to sort" << std::endl
+              << "-a, --axis=<integer>  Axis along which to sort (default = 0)" << std::endl
               << "-p, --pipe            Pipe output to standard out" << std::endl
               << std::endl;
 }
@@ -82,34 +82,61 @@ bool validateProgramOptions_sort(MX_opt &opt)
 }
 // function
 
-bool cmp_row(const MTXRecord &a, const MTXRecord &b)
+// bool cmp_row(const newMTXRecord &a, const newMTXRecord &b)
+// {
+//     if (a.row == b.row)
+//     {
+//         return (a.col < b.col);
+//     }
+//     else
+//     {
+//         return (a.row < b.row);
+//     }
+// }
+
+// bool cmp_col(const newMTXRecord &a, const newMTXRecord &b)
+// {
+// if (a.col == b.col)
+// {
+//     return (a.row < b.row);
+// }
+// else
+// {
+//     return (a.col < b.col);
+// }
+// }
+
+bool cmp_val(const newMTXRecord &a, const newMTXRecord &b)
 {
-    if (a.row == b.row)
-    {
-        return (a.col < b.col);
-    }
-    else
-    {
-        return (a.row < b.row);
-    }
+    return (a.value < b.value);
 }
 
-bool cmp_col(const MTXRecord &a, const MTXRecord &b)
+// TODO, recursive strategy for comparator
+class cmp
 {
-    if (a.col == b.col)
-    {
-        return (a.row < b.row);
-    }
-    else
-    {
-        return (a.col < b.col);
-    }
-}
+    int axis;
+    int ndim;
 
-bool cmp_val(const MTXRecord &a, const MTXRecord &b)
-{
-    return (a.val < b.val);
-}
+public:
+    cmp(int a, int nd) : axis(a), ndim(nd) {}
+
+    bool operator()(const newMTXRecord &a, const newMTXRecord &b)
+    {
+        // logic uses axis
+        // for (int i = axis; i < (ndim + axis); i++)
+        // {
+        //     int m = i % ndim;
+        // }
+        if (a.idx[axis % ndim] == b.idx[axis % ndim])
+        {
+            return (a.idx[(axis + 1) % ndim] < b.idx[(axis + 1) % ndim]);
+        }
+        else
+        {
+            return (a.idx[axis % ndim] < b.idx[axis % ndim]);
+        }
+    }
+};
 
 void mx_sort(MX_opt &opt)
 {
@@ -141,38 +168,36 @@ void mx_sort(MX_opt &opt)
     }
     std::ostream outf(buf);
 
-    int naxis = 3;
+    newMTXHeader header;
+    parseNewHeader(inf, header);
 
-    std::function<bool(const MTXRecord &, const MTXRecord &)> cmp[] = {&cmp_row, &cmp_col, &cmp_val};
     int axis = opt.axis;
-    // TODO: get length of cmp
+    auto cmp_func = cmp(axis, header.ndim);
     if (axis == -1)
     {
-        // sort by value
-        axis = naxis - 1;
+        auto cmp_func = cmp_val;
     }
 
-    MTXHeader header;
-    parseHeader(inf, header);
-
-    MTXRecord r;
-    std::vector<MTXRecord> vec;
+    newMTXRecord r;
+    std::vector<newMTXRecord> vec;
     std::string line;
 
     while (std::getline(inf, line))
     {
-        std::stringstream ss(line);
-        ss >> r.row >> r.col >> r.val;
+        parseNewRecord(line, r, header);
         vec.push_back(r);
     }
 
-    std::sort(vec.begin(), vec.end(), cmp[axis]);
+    std::sort(vec.begin(), vec.end(), cmp_func);
 
-    writeHeader(outf, header);
+    if (!opt.stream_out)
+    {
+        writeNewHeader(outf, header);
+    }
 
     // entries
     for (int i = 0; i < vec.size(); i++)
     {
-        outf << vec[i].row << ' ' << vec[i].col << ' ' << vec[i].val << '\n';
+        writeNewRecord(outf, vec[i], header);
     }
 }

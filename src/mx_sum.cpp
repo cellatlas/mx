@@ -108,46 +108,35 @@ void mx_sum(MX_opt &opt)
     }
     std::ostream outf(buf);
 
-    MTXHeader header;
-    parseHeader(inf, header);
+    newMTXHeader header;
+    // problem: if streaming in then we dont have the header..
+    parseNewHeader(inf, header);
 
     std::string line;
-    MTXRecord r;
+    newMTXRecord prev_r, curr_r;
 
     int axis = opt.axis;
 
     // get first line
     std::getline(inf, line);
-    std::stringstream ss(line);
-    ss >> r.row >> r.col >> r.val;
+    parseNewRecord(line, prev_r, header);
 
-    std::vector<int> idx;
-    idx.push_back(r.row);
-    idx.push_back(r.col);
-    std::vector<int> prev_idx = idx;
-
-    float s = r.val;
+    float s = prev_r.value;
 
     // loop through file
     while (std::getline(inf, line))
     {
-        std::stringstream ss(line);
-        ss >> r.row >> r.col >> r.val;
+        parseNewRecord(line, curr_r, header);
 
-        idx[0] = r.row;
-        idx[1] = r.col;
-
-        if (idx[axis] != prev_idx[axis])
+        if (curr_r.idx[axis] != prev_r.idx[axis])
         {
-            outf << s << '\n';
+            outf << prev_r.idx[axis] << header.delim << s << '\n';
             // outf.write((char *)&s, sizeof(s));
             s = 0;
         }
-        s += r.val;
-
-        prev_idx = idx;
+        s += curr_r.value;
+        prev_r = curr_r;
     }
     // write out the straggler
-    outf << s << '\n';
-    // outf.write((char *)&s, sizeof(s));
+    outf << prev_r.idx[axis] << header.delim << s << '\n';
 }

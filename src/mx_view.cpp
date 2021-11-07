@@ -114,12 +114,18 @@ void mx_shape(MX_opt &opt)
             inbuf = infstream.rdbuf();
         }
         std::istream inf(inbuf);
-        MTXHeader header;
+
+        newMTXHeader header;
 
         // Parse header
-        parseHeader(inf, header);
-        // parseNewHeader(inf, header);
-        outf << header.nrows << "\t" << header.ncols << "\t" << header.nnzero << std::endl;
+        parseNewHeader(inf, header);
+        // write indices
+        for (int i = 0; i < header.ndim; i++)
+        {
+            outf << header.idx_data[i] << header.delim;
+        }
+        // write nnzero, last element
+        outf << header.idx_data[header.ndim] << std::endl;
     }
 }
 
@@ -154,23 +160,23 @@ void mx_view(MX_opt &opt)
             inbuf = infstream.rdbuf();
         }
         std::istream inf(inbuf);
-        MTXHeader header;
 
+        newMTXHeader header;
         // Parse header
-        parseHeader(inf, header);
+        parseNewHeader(inf, header);
 
-        writeHeader(outf, header);
+        if (!opt.stream_out)
+        {
+            writeNewHeader(outf, header);
+        }
 
         // Parse the rest of the matrix
         std::string line;
-
-        MTXRecord r;
+        newMTXRecord r;
         while (std::getline(inf, line))
         {
-            std::stringstream ss(line);
-            ss >> r.row >> r.col >> r.val;
-
-            outf << r.row << ' ' << r.col << ' ' << r.val << '\n';
+            parseNewRecord(line, r, header);
+            writeNewRecord(outf, r, header);
         }
     }
 }
