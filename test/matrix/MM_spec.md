@@ -1,15 +1,18 @@
-# MTX modified format for use with mx
+# MatrixMarket
 
-https://nvlpubs.nist.gov/nistpubs/Legacy/IR/nistir5935.pdf
+`Source: https://nvlpubs.nist.gov/nistpubs/Legacy/IR/nistir5935.pdf`
 
-```
-Our philosophy is that a new matrix format need not be defined unless (a) it can save at least one-half the storage of the best alternative, or (b) it supports a format of keen interest to a large community.
-```
+> Our philosophy is that a new matrix format need not be defined unless (a) it can save at least one-half the storage of the best alternative, or (b) it supports a format of keen interest to a large community.
 
-All Matrix Market exchange format files contain three sections, which must appear in
-order.
+All Matrix Market exchange format files contain three sections, which must appear in order:
 
-## Header. The first line must follow the following template:
+1. Header
+2. Comments
+3. Data
+
+### Header.
+
+The first line must follow the following template:
 
 `%%MatrixMarket object format [qualifier . . .]`
 
@@ -21,9 +24,13 @@ order.
 | qualifiers[0] (field)    | type of values           | char[qualifiers[0]] | `real` `complex` `integer` `pattern`               |
 | qualifiers[1] (symmetry) | symmetry of matrix       | char[qualifiers[1]] | `general` `symmetric` `skew-symmetric` `hermitian` |
 
-Note, `qualifiers` depend on object type.
+_Note, `qualifiers` depend on object type._
 
-### `object`
+A MatrixMarket file has different specifications depending on header values.
+
+#### `object`
+
+This is the type of object that the file is representing. The `matrix` option covers most use cases.
 
 | field          | description    |
 | -------------- | -------------- |
@@ -31,16 +38,20 @@ Note, `qualifiers` depend on object type.
 | vector         | vector         |
 | directed graoh | directed graph |
 
-### `format`
+#### `format`
+
+This specifies the format of the matrix being stored. For sparse matrices, use `coordinate`.
 
 | field      | description                                                                                                                |
 | ---------- | -------------------------------------------------------------------------------------------------------------------------- |
 | coordinate | General sparse matrices. Only nonzero entries are provided, and the coordinates of each nonzero entry is given explicitly. |
 | array      | General dense matrices. All entries are provided in a pre-defined (column-oriented) order.                                 |
 
-### `qualifier(s)`
+#### `qualifier(s)`
 
-`qualifiers[0]` = `field` (Determines the type and number of values listed for each matrix entry.)
+The `qualifiers` describe various properties of the `object` and its values.
+
+`qualifiers[0]`, or `field` determines the type and number of values listed for each matrix entry.
 
 | field   | description                                                                                                     |
 | ------- | --------------------------------------------------------------------------------------------------------------- |
@@ -49,7 +60,7 @@ Note, `qualifiers` depend on object type.
 | integer | Matrix entries are represented by a single integer.                                                             |
 | pattern | Only the matrix nonzero pattern is provided. Matrix entries are omitted (only the nonzero pattern is supplied). |
 
-`qualifiers[1]` = `symmetry` Determines how to interpret (specifically, how to replicate) the matrix entries.
+`qualifiers[1]`, or `symmetry` determines how to interpret (specifically, how to replicate) the matrix entries.
 
 | field     | description                                                                                                        |
 | --------- | ------------------------------------------------------------------------------------------------------------------ |
@@ -57,20 +68,20 @@ Note, `qualifiers` depend on object type.
 | symmetric | Square matrix with aij = aji. Entries below the main diagonal are stored. The entries on the main digonal are zero |
 | hermitian | Square complex matrix with aij = conjugate(aji). Only entries on or below the matrix diagonal are provided         |
 
-## Comments.
+### Comments.
 
 After the header, zero or more lines of comments can be added (each with first character %)
 
-## Data.
+### Data.
 
-The remainder of the file contains the data which represents the object. The details of the format depend upon the type of object. For simplicity, each data entry should occupy one line. (Of course, a single data entry may be comprised of more than one number.)
+The remainder of the file contains the data which represent the `object`. The details of the format depend upon the type of `object`. For simplicity, each data entry should occupy one line. (Of course, a single data entry may be comprised of more than one number.)
 
 Other rules:
 
 - All lines are limited to 1024 characters (for purposes of line buffering).
 - Blank lines may appear anywhere after the first line.
-- Numeric data on a given line is separated by one or more blanks; leading and traihng blanks are ignored.
-- Real data items must be in floating-point decimal format, optionally utilizing the E-format exponential notation common to C and Fortran.
+- Numeric data on a given line is separated by one or more blanks; leading and trailing blanks are ignored.
+- Data items of field `real` must be represented by a floating-point decimal, optionally utilizing the E-format exponential notation common to C and Fortran.
 - All indices are 1-based. That is, all rows and columns are numbered starting with 1.
 - Character data may be in either upper or lower case (i.e., readers must be case insensitive.)
 
@@ -78,12 +89,12 @@ Example of data:
 
 ```
 M N L
-I J A(I,J)
-I J A(I,J)
-I J A(I,J)
+a b A(a,b)
+a c A(a,c)
+d b A(d,b)
 ```
 
-## Example file
+### Example file
 
 ```
 %%MatrixMarket matrix coordinate real general
