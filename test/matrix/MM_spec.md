@@ -10,7 +10,7 @@ All Matrix Market exchange format files contain three sections, which must appea
 2. Comments
 3. Data
 
-### 1. Header.
+## 1. Header.
 
 The first line must follow the following template:
 
@@ -28,7 +28,7 @@ _Note, `qualifiers` depend on object type._
 
 A MatrixMarket file has different specifications depending on header values.
 
-#### `object`
+### `object`
 
 This is the type of object that the file is representing. The `matrix` option covers most use cases.
 
@@ -38,7 +38,7 @@ This is the type of object that the file is representing. The `matrix` option co
 | vector         | vector         |
 | directed graoh | directed graph |
 
-#### `format`
+### `format`
 
 This specifies the format of the matrix being stored. For sparse matrices, use `coordinate`.
 
@@ -47,7 +47,7 @@ This specifies the format of the matrix being stored. For sparse matrices, use `
 | coordinate | General sparse matrices. Only nonzero entries are provided, and the coordinates of each nonzero entry is given explicitly. |
 | array      | General dense matrices. All entries are provided in a pre-defined (column-oriented) order.                                 |
 
-#### `qualifier(s)`
+### `qualifier(s)`
 
 The `qualifiers` describe various properties of the `object` and its values.
 
@@ -68,11 +68,11 @@ The `qualifiers` describe various properties of the `object` and its values.
 | symmetric | Square matrix with aij = aji. Entries below the main diagonal are stored. The entries on the main digonal are zero |
 | hermitian | Square complex matrix with aij = conjugate(aji). Only entries on or below the matrix diagonal are provided         |
 
-### 2. Comments.
+## 2. Comments.
 
 After the header, zero or more lines of comments can be added (each with first character %)
 
-### 3. Data.
+## 3. Data.
 
 The remainder of the file contains the data which represent the `object`. The details of the format depend upon the type of `object`. For simplicity, each data entry should occupy one line. (Of course, a single data entry may be comprised of more than one number.)
 
@@ -94,7 +94,7 @@ a c A(a,c)
 d b A(d,b)
 ```
 
-### Example file
+## Example file
 
 ```
 %%MatrixMarket matrix coordinate real general
