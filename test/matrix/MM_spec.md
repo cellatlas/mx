@@ -10,7 +10,7 @@ All Matrix Market exchange format files contain three sections, which must appea
 2. Comments
 3. Data
 
-### Header.
+### 1. Header.
 
 The first line must follow the following template:
 
@@ -68,11 +68,11 @@ The `qualifiers` describe various properties of the `object` and its values.
 | symmetric | Square matrix with aij = aji. Entries below the main diagonal are stored. The entries on the main digonal are zero |
 | hermitian | Square complex matrix with aij = conjugate(aji). Only entries on or below the matrix diagonal are provided         |
 
-### Comments.
+### 2. Comments.
 
 After the header, zero or more lines of comments can be added (each with first character %)
 
-### Data.
+### 3. Data.
 
 The remainder of the file contains the data which represent the `object`. The details of the format depend upon the type of `object`. For simplicity, each data entry should occupy one line. (Of course, a single data entry may be comprised of more than one number.)
 
