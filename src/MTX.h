@@ -28,8 +28,6 @@ struct MTXRecord
     uint32_t idx[2]; // same size as ndim
 };
 
-void trackIndex(MTXRecord &record, MTXHeader &header, int &numWritten, int &axis);
-
 void writeMTXHeader(std::ostream &outf, MTXHeader &header);
 void readMTXHeader(std::istream &inf, MTXHeader &header);
 void parseMTXHeader(std::istream &inf, MTXHeader &header);

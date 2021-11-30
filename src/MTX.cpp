@@ -197,21 +197,3 @@ void writeMTXRecord(std::ostream &outf, MTXRecord &r, MTXHeader &h)
     // outf << sp << '\n';
     outf << r.value << '\n';
 }
-
-// track index
-
-void trackIndex(MTXRecord &r, MTXHeader &h, int &nw, int &axis)
-{
-    for (int i = 0; i < h.ndim; i++)
-    {
-        if (r.idx[i] > h.idx_data[i])
-        {
-            // update the tracker record
-            h.idx_data[i] = r.idx[i];
-        }
-    }
-    // increase number of nonzero elements
-    h.idx_data[h.ndim]++;
-
-    r.idx[axis] = nw;
-}
