@@ -151,3 +151,28 @@ void MX_to_MTX_Record(MXRecord &mx_r, MTXRecord &mtx_r)
     mtx_r.value = mx_r.value;
     std::copy(std::begin(mx_r.idx), std::end(mx_r.idx), std::begin(mtx_r.idx));
 }
+
+// extract list
+
+bool parseExtractList(const std::string &filename, std::unordered_map<int32_t, int32_t> &m)
+{
+    // extract list is a {value, index} map
+    // values are derived from the select file, index is the 0-index position
+    std::ifstream inf(filename.c_str());
+    int32_t ele;
+
+    int i = 0;
+    while (inf >> ele)
+    {
+        m.insert({ele, i});
+        i++;
+    }
+    return true;
+}
+void printExtractList(std::unordered_map<int32_t, int32_t> &m)
+{
+    for (auto &i : m)
+    {
+        std::cout << i.first << ", " << i.second << std::endl;
+    }
+}

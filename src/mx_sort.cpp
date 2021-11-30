@@ -191,5 +191,5 @@ void mx_sort(MX_opt &opt)
     {
         ofs.close();
     }
-    std::cerr << "Sorted " << nr << " records along axis " << axis << std::endl;
+    std::cerr << nr << " records sorted along axis " << axis << std::endl;
 }

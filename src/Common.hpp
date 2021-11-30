@@ -48,4 +48,7 @@ void MX_to_MTX_Header(MXHeader &mx_h, MTXHeader &mtx_h);
 void MX_to_MTX_Record(MXRecord &mx_r, MTXRecord &mtx_r);
 void buildMTXHeaderOptions(std::unordered_map<std::string, std::unordered_map<std::string, uint32_t>> &hmaps);
 void buildMTXHeaderOptions_inv(std::unordered_map<std::string, std::unordered_map<uint32_t, std::string>> &hmaps_inv);
+
+bool parseExtractList(const std::string &filename, std::unordered_map<int32_t, int32_t> &extractList);
+void printExtractList(std::unordered_map<int32_t, int32_t> &extractList);
 #endif

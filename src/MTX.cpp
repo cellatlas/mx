@@ -198,31 +198,6 @@ void writeMTXRecord(std::ostream &outf, MTXRecord &r, MTXHeader &h)
     outf << r.value << '\n';
 }
 
-// extract list
-
-bool parseExtractList(const std::string &filename, std::unordered_map<int32_t, int32_t> &m)
-{
-    // extract list is a {value, index} map
-    // values are derived from the select file, index is the 0-index position
-    std::ifstream inf(filename.c_str());
-    int32_t ele;
-
-    int i = 0;
-    while (inf >> ele)
-    {
-        m.insert({ele, i});
-        i++;
-    }
-    return true;
-}
-void printExtractList(std::unordered_map<int32_t, int32_t> &m)
-{
-    for (auto &i : m)
-    {
-        std::cout << i.first << ", " << i.second << std::endl;
-    }
-}
-
 // track index
 
 void trackIndex(MTXRecord &r, MTXHeader &h, int &nw, int &axis)

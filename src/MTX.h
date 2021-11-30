@@ -40,7 +40,4 @@ void parseMTXRecord(std::string &line, MTXRecord &record, MTXHeader &header);
 
 void printHeader(MTXHeader &header);
 
-bool parseExtractList(const std::string &filename, std::unordered_map<int32_t, int32_t> &extractList);
-void printExtractList(std::unordered_map<int32_t, int32_t> &extractList);
-
 #endif
