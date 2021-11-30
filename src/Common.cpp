@@ -41,6 +41,15 @@ std::string str_tolower(std::string s)
     return s;
 }
 
+size_t PAD = std::pow(2, 4);
+void stringify(const std::string &s, std::string &sp)
+{
+    std::string m;
+    size_t slen = s.length();
+
+    sp = s + std::string(PAD - std::min(PAD, slen), ' ');
+}
+
 void buildMTXHeaderOptions(std::unordered_map<std::string, std::unordered_map<std::string, uint32_t>> &hmaps)
 {
     std::unordered_map<std::string, uint32_t> objects;

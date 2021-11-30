@@ -39,6 +39,8 @@ struct MX_opt
 
 void file_direction(std::string &ifn, std::string &ofn, bool &stream_in, bool &stream_out, std::streambuf *&ibuf, std::streambuf *&obuf, std::ifstream &ifs, std::ofstream &ofs);
 std::string str_tolower(std::string s);
+
+void stringify(const std::string &s, std::string &sp);
 void MTX_to_MX_Header(MTXHeader &mtx_h, MXHeader &mx_h);
 void MTX_to_MX_Record(MTXRecord &mtx_r, MXRecord &mx_r);
 

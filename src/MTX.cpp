@@ -9,7 +9,7 @@
 #include <cmath>     // pow
 #include <algorithm> // min
 
-size_t PAD = std::pow(2, 4);
+// size_t PAD = std::pow(2, 4);
 
 template <typename Out>
 void split(const std::string &s, char delim, Out result)
@@ -22,22 +22,22 @@ void split(const std::string &s, char delim, Out result)
     }
 }
 
-template <typename integer>
-void stringify(integer &val, std::string &sp)
-{
-    std::string m, s;
-    m = "";
-    s = std::to_string(val);
-    size_t slen = s.length();
+// template <typename integer>
+// void stringify(integer &val, std::string &sp)
+// {
+//     std::string m, s;
+//     m = "";
+//     s = std::to_string(val);
+//     size_t slen = s.length();
 
-    // if the number is negative, increase len of string rep of number
-    if (val < 0)
-    {
-        m = "-";
-        s = std::to_string(std::abs((int32_t)val));
-    };
-    sp = m + std::string(PAD - std::min(PAD, slen), '0') + s;
-}
+//     // if the number is negative, increase len of string rep of number
+//     if (val < 0)
+//     {
+//         m = "-";
+//         s = std::to_string(std::abs((int32_t)val));
+//     };
+//     sp = m + std::string(PAD - std::min(PAD, slen), '0') + s;
+// }
 
 // header
 

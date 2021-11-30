@@ -34,27 +34,6 @@ in main.cpp add subcmd to functions list
     and add 1 to function_count
 */
 
-void displayProgramOptions_MX()
-{
-    std::cout << "mx " << MX_VERSION << std::endl
-              << std::endl
-              << "Usage: mx <cmd> [arguments] ..." << std::endl
-              << "where <cmd> can be one of: " << std::endl
-              << std::endl
-              << "view              View matrix" << std::endl
-              << "shape             Print matrix shape" << std::endl
-              << "sort              Sort matrix" << std::endl
-              << "sum               Sum elements" << std::endl
-              << "multiply          Multiply elements" << std::endl
-              << "extract           Extract elements" << std::endl
-              << "sample            Sample elements" << std::endl
-              << "text              Print matrix as text" << std::endl
-              << std::endl
-              << "Running mx <cmd> without arguments prints usage information for <cmd>"
-              << std::endl
-              << std::endl;
-}
-
 // TODO: fix input subcommands taking in multiple files
 // vs just stdin, ie clean up code
 
@@ -63,6 +42,7 @@ void displayProgramOptions_MX()
 typedef struct
 {
     std::string subcmd;
+    std::string description;
     void (*display)();
     void (*parse)(int, char *[], MX_opt &);
     bool (*validate)(MX_opt &);
@@ -70,18 +50,35 @@ typedef struct
 } SubCommands;
 
 const SubCommands functions[]{
-    {"view", displayProgramOptions_view, parseProgramOptions_view, validateProgramOptions_view, mx_view},
-    {"shape", displayProgramOptions_text, parseProgramOptions_text, validateProgramOptions_text, mx_shape},
-    {"sort", displayProgramOptions_sort, parseProgramOptions_sort, validateProgramOptions_sort, mx_sort},
-    {"sum", displayProgramOptions_sum, parseProgramOptions_sum, validateProgramOptions_sum, mx_sum},
-    {"extract", displayProgramOptions_extract, parseProgramOptions_extract, validateProgramOptions_extract, mx_extract},
-    {"sample", displayProgramOptions_sample, parseProgramOptions_sample, validateProgramOptions_sample, mx_sample},
-    {"multiply", displayProgramOptions_multiply, parseProgramOptions_multiply, validateProgramOptions_multiply, mx_multiply},
-    {"text", displayProgramOptions_text, parseProgramOptions_text, validateProgramOptions_text, mx_text},
-    {"fromtext", displayProgramOptions_text, parseProgramOptions_text, validateProgramOptions_text, mx_fromtext},
+    {"text", "Convert .mx to .mtx", displayProgramOptions_text, parseProgramOptions_text, validateProgramOptions_text, mx_text},
+    {"fromtext", "Convert .mtx to .mx", displayProgramOptions_text, parseProgramOptions_text, validateProgramOptions_text, mx_fromtext},
+    {"shape", "Print shape of matrix", displayProgramOptions_shape, parseProgramOptions_text, validateProgramOptions_text, mx_shape},
+    {"extract", "Extract elements", displayProgramOptions_extract, parseProgramOptions_extract, validateProgramOptions_extract, mx_extract},
+    {"sum", "Sum elements", displayProgramOptions_sum, parseProgramOptions_sum, validateProgramOptions_sum, mx_sum},
+    {"sort", "Sort elements", displayProgramOptions_sort, parseProgramOptions_sort, validateProgramOptions_sort, mx_sort},
 };
 
 const int function_count = sizeof(functions) / sizeof(*functions);
+
+void displayProgramOptions_MX()
+{
+    std::cout << "mx " << MX_VERSION << std::endl
+              << std::endl
+              << "Usage: mx <cmd> [arguments] ..." << std::endl
+              << "where <cmd> can be one of: " << std::endl
+              << std::endl;
+    std::string subcmd, subcmd_sp;
+    for (auto &ele : functions)
+    {
+        // pretty print to align descriptions
+        stringify(ele.subcmd, subcmd_sp);
+        std::cout << subcmd_sp << ele.description << std::endl;
+    }
+    std::cout << std::endl;
+
+    std::cout << "Running mx <cmd> without arguments prints usage information for <cmd>" << std::endl
+              << std::endl;
+}
 
 int main(int argc, char *argv[])
 {

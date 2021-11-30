@@ -17,6 +17,16 @@ void displayProgramOptions_text()
               << std::endl;
 }
 
+void displayProgramOptions_shape()
+{
+    std::cout << "Usage: mx shape [options] mtx-files" << std::endl
+              << std::endl
+              << "Options:" << std::endl
+              << "-o, --output      File for output" << std::endl
+              << "-p, --pipe        Pipe output to standard out" << std::endl
+              << std::endl;
+}
+
 // parse
 static int verbose_flag;
 
