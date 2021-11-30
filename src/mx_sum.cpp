@@ -77,43 +77,18 @@ bool validateProgramOptions_sum(MX_opt &opt)
 
 // function
 
-// void file_direction(std::string &ifn, std::string &ofn, bool &stream_in, bool &stream_out, std::istream *&inf_ptr, std::ostream *&outf_ptr)
-// {
-//     // IN
-//     std::ifstream ifs;
-//     std::streambuf *ibuf = nullptr;
-//     if (stream_in)
-//     {
-//         ibuf = std::cin.rdbuf();
-//     }
-//     else
-//     {
-//         ifs.open(ifn, std::ios::in);
-//         ibuf = ifs.rdbuf();
-//     }
-//     std::istream inf(ibuf);
-//     inf_ptr = &inf;
-
-//     // OUT
-//     std::ofstream ofs;
-//     std::streambuf *obuf = nullptr;
-//     if (stream_out)
-//     {
-//         obuf = std::cout.rdbuf();
-//     }
-//     else
-//     {
-//         ofs.open(ofn);
-//         obuf = ofs.rdbuf();
-//     }
-//     std::ostream outf(obuf);
-//     outf_ptr = &outf;
-//     return;
-// }
-
 void mx_sum(MX_opt &opt)
 {
-    // Setup file direction in and out
+    std::cerr << ".mx file must be sorted along axis " << opt.axis << std::endl;
+    /// Notes for Angel
+    // for summing along axis i, mx file must be sorted first
+    // along that axis
+    // read in header
+    // read in mtx records
+    // iterate through records
+    /// End notes for Angel
+
+    // file direction
     std::ifstream ifs;
     std::ofstream ofs;
     std::streambuf *ibuf, *obuf = nullptr;
@@ -121,56 +96,59 @@ void mx_sum(MX_opt &opt)
     std::istream inf(ibuf);
     std::ostream outf(obuf);
 
+    // read in header
+    MXHeader h;
+    MXRecord r;
+    readMXHeader(inf, h);
+
+    // set axis along which to sum
     int axis = opt.axis;
 
-    size_t nr = 0;
-    size_t N = 100000;
-    MTXRecord *p = new MTXRecord[N];
-    char *buf = new char[N];
+    // storage for summed value
+    int32_t sum;
 
-    // problem: if streaming in then we dont have the header..
-    MTXHeader header;
-    MTXRecord prev_r, curr_r;
+    // setup bulk parsing
     std::string line;
-
-    parseMTXHeader(inf, header);
-    std::getline(inf, line); // get first line
-    parseMTXRecord(line, prev_r, header);
-
-    int32_t s = prev_r.value;
-
+    size_t N = 1000;
+    size_t nr = 0;
+    int rc = 0;
+    MXRecord *p = new MXRecord[N];
+    bool readr = false;
     while (true)
     {
-        inf.read((char *)p, N * sizeof(MTXRecord));
-        size_t rc = inf.gcount() / sizeof(MTXRecord);
-        if (rc == 0)
+        // read in records
+        readr = readManyMXRecords(inf, p, h, N);
+        if (readr)
         {
-            break;
-        }
-        for (size_t i = 0; i < rc; i++)
-        {
-            writeMTXRecord(std::cout, p[i], header);
-            // parseMTXRecord(p[i], curr_r, header);
-            // if (curr_r.idx[axis] != prev_r.idx[axis])
-            // {
-            //     outf << prev_r.idx[axis] << header.delim << s << '\n';
-            //     // outf.write((char *)&s, sizeof(s));
-            //     s = 0;
-            // }
-            // s += curr_r.value;
-            // prev_r = curr_r;
-            if (i > 10)
+            rc = inf.gcount() / sizeof(MXRecord);
+            nr += rc;
+            if (rc == 0)
             {
                 break;
             }
+
+            // main code change here
+            for (size_t i = 0; i < rc; i++)
+            {
+                // do summing here
+                // if p[i].idx[axis] is diff from p[i+1].idx[axis]
+                // write sum
+                // restart sum
+                // else sum += p[i].idx[axis]
+            }
         }
-        break;
+
+        // no more records or error out then break
+        else
+        {
+            break;
+        }
     }
 
-    // // loop through file
-    // while (std::getline(inf, line))
-    // {
-    // }
-    // // write out the straggler
-    // // outf << prev_r.idx[axis] << header.delim << s << '\n';
+    // close ostream
+    if (!opt.stream_out)
+    {
+        ofs.close();
+    }
+    std::cerr << "Parsed " << nr << " records" << std::endl;
 }
