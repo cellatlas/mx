@@ -1,5 +1,4 @@
 #include "Common.hpp"
-#include "MTX.h"
 #include <iostream>
 #include <fstream>
 #include <sstream>
@@ -93,80 +92,81 @@ bool validateProgramOptions_sample(MX_opt &opt)
 
 void mx_sample(MX_opt &opt)
 {
-    // Setup file direction IN
-    std::streambuf *inbuf = nullptr;
-    std::ifstream infstream;
-    if (opt.stream_in)
-    {
-        inbuf = std::cin.rdbuf();
-    }
-    else
-    {
-        infstream.open(opt.files[0]); // only does the first file
-        inbuf = infstream.rdbuf();
-    }
-    std::istream inf(inbuf);
+    std::cout << "sample" << std::endl;
+    // // Setup file direction IN
+    // std::streambuf *inbuf = nullptr;
+    // std::ifstream infstream;
+    // if (opt.stream_in)
+    // {
+    //     inbuf = std::cin.rdbuf();
+    // }
+    // else
+    // {
+    //     infstream.open(opt.files[0]); // only does the first file
+    //     inbuf = infstream.rdbuf();
+    // }
+    // std::istream inf(inbuf);
 
-    // perform the sampling
-    MTXHeader header; // defaults set in MTX.h
-    parseHeader(inf, header);
+    // // perform the sampling
+    // MTXHeader header; // defaults set in MTX.h
+    // parseHeader(inf, header);
 
-    // Setup file direction OUT
-    std::streambuf *buf = nullptr;
-    std::ofstream of;
-    if (opt.stream_out)
-    {
-        buf = std::cout.rdbuf();
-    }
-    else
-    {
-        of.open(opt.output);
-        buf = of.rdbuf();
-    }
-    std::ostream outf(buf);
+    // // Setup file direction OUT
+    // std::streambuf *buf = nullptr;
+    // std::ofstream of;
+    // if (opt.stream_out)
+    // {
+    //     buf = std::cout.rdbuf();
+    // }
+    // else
+    // {
+    //     of.open(opt.output);
+    //     buf = of.rdbuf();
+    // }
+    // std::ostream outf(buf);
 
-    MTXRecord r;
-    std::string line;
+    // MTXRecord r;
+    // std::string line;
 
-    MTXRecord *buffer = new MTXRecord[opt.k_samples]; // dynamically allocated
-    int nr = 0;
+    // MTXRecord *buffer = new MTXRecord[opt.k_samples]; // dynamically allocated
+    // int nr = 0;
 
-    std::random_device dev;
-    std::mt19937 rng(dev());
-    std::uniform_int_distribution<std::mt19937::result_type> rd_idx(0, opt.k_samples - 1); // [0, k-1] random index
+    // std::random_device dev;
+    // std::mt19937 rng(dev());
+    // std::uniform_int_distribution<std::mt19937::result_type> rd_idx(0, opt.k_samples - 1); // [0, k-1] random index
 
-    while (std::getline(inf, line))
-    {
-        std::stringstream ss(line);
-        ss >> r.row >> r.col >> r.val;
+    // while (std::getline(inf, line))
+    // {
+    //     std::stringstream ss(line);
+    //     ss >> r.row >> r.col >> r.val;
 
-        // place first k records into buffer
-        if (nr < opt.k_samples)
-        {
-            buffer[nr] = r;
-        }
-        else
-        {
-            std::uniform_int_distribution<std::mt19937::result_type> dist(0, nr); // distribution in range [0, nr]
-            // determine if random number generator is between [0, k) (replace) or [k, i) (dont replace)
-            if (dist(rng) < opt.k_samples)
-            {
-                buffer[rd_idx(rng)] = r;
-            }
-        }
-        nr++;
-    }
+    //     // place first k records into buffer
+    //     if (nr < opt.k_samples)
+    //     {
+    //         buffer[nr] = r;
+    //     }
+    //     else
+    //     {
+    //         std::uniform_int_distribution<std::mt19937::result_type> dist(0, nr); // distribution in range [0, nr]
+    //         // determine if random number generator is between [0, k) (replace) or [k, i) (dont replace)
+    //         if (dist(rng) < opt.k_samples)
+    //         {
+    //             buffer[rd_idx(rng)] = r;
+    //         }
+    //     }
+    //     nr++;
+    // }
 
-    // TODO fix header
-    // write the new matrix
-    // header
+    // // TODO fix header
+    // // write the new matrix
+    // // header
 
-    writeHeader(outf, header);
+    // writeMTXHeader(outf, header);
 
-    for (int i = 0; i < opt.k_samples; i++)
-    {
-        outf << buffer[i].row << ' ' << buffer[i].col << ' ' << buffer[i].val << '\n';
-    }
+    // for (int i = 0; i < opt.k_samples; i++)
+    // {
+    //     outf << buffer[i].row << ' ' << buffer[i].col << ' ' << buffer[i].val << '\n';
+    // }
 
-    delete[] buffer;
+    // delete[] buffer;
 }

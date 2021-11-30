@@ -1,5 +1,4 @@
 #include "mx_view.h"
-#include "MTX.h"
 #include "getopt.h"
 
 #include <sstream>
@@ -82,101 +81,55 @@ bool validateProgramOptions_view(MX_opt &opt)
 
 // function
 
-void mx_shape(MX_opt &opt)
-{
-    // If there is no output file write to stdout
-    std::streambuf *buf = nullptr;
-    std::ofstream of;
-    if (opt.stream_out)
-    {
-        buf = std::cout.rdbuf();
-    }
-    else
-    {
-        of.open(opt.output);
-        buf = of.rdbuf();
-    }
-    std::ostream outf(buf);
-
-    // loop through the input files
-    for (int i = 0; i < opt.files.size(); i++)
-    {
-        // Setup file direction in
-        std::streambuf *inbuf = nullptr;
-        std::ifstream infstream;
-        if (opt.stream_in)
-        {
-            inbuf = std::cin.rdbuf();
-        }
-        else
-        {
-            infstream.open(opt.files[i]); // only does the first file
-            inbuf = infstream.rdbuf();
-        }
-        std::istream inf(inbuf);
-
-        newMTXHeader header;
-
-        // Parse header
-        parseNewHeader(inf, header);
-        // write indices
-        for (int i = 0; i < header.ndim; i++)
-        {
-            outf << header.idx_data[i] << header.delim;
-        }
-        // write nnzero, last element
-        outf << header.idx_data[header.ndim] << std::endl;
-    }
-}
-
 void mx_view(MX_opt &opt)
 {
+    std::cout << "view" << std::endl;
 
-    std::streambuf *buf = nullptr;
-    std::ofstream of;
-    if (opt.stream_out)
-    {
-        buf = std::cout.rdbuf();
-    }
-    else
-    {
-        of.open(opt.output);
-        buf = of.rdbuf();
-    }
-    std::ostream outf(buf);
+    //     std::streambuf *buf = nullptr;
+    //     std::ofstream of;
+    //     if (opt.stream_out)
+    //     {
+    //         buf = std::cout.rdbuf();
+    //     }
+    //     else
+    //     {
+    //         of.open(opt.output);
+    //         buf = of.rdbuf();
+    //     }
+    //     std::ostream outf(buf);
 
-    for (int i = 0; i < opt.files.size(); i++)
-    {
-        // Setup file direction in
-        std::streambuf *inbuf = nullptr;
-        std::ifstream infstream;
-        if (opt.stream_in)
-        {
-            inbuf = std::cin.rdbuf();
-        }
-        else
-        {
-            infstream.open(opt.files[i]);
-            inbuf = infstream.rdbuf();
-        }
-        std::istream inf(inbuf);
+    //     for (int i = 0; i < opt.files.size(); i++)
+    //     {
+    //         // Setup file direction in
+    //         std::streambuf *inbuf = nullptr;
+    //         std::ifstream infstream;
+    //         if (opt.stream_in)
+    //         {
+    //             inbuf = std::cin.rdbuf();
+    //         }
+    //         else
+    //         {
+    //             infstream.open(opt.files[i]);
+    //             inbuf = infstream.rdbuf();
+    //         }
+    //         std::istream inf(inbuf);
 
-        newMTXHeader header;
-        // Parse header
-        parseNewHeader(inf, header);
+    //         newMTXHeader header;
+    //         // Parse header
+    //         parseMTXHeader(inf, header);
 
-        if (!opt.stream_out)
-        {
-            writeNewHeader(outf, header);
-        }
+    //         if (!opt.stream_out)
+    //         {
+    //             writeMTXHeader(outf, header);
+    //         }
 
-        // Parse the rest of the matrix
-        std::string line;
-        newMTXRecord r;
-        while (std::getline(inf, line))
-        {
-            parseNewRecord(line, r, header);
-            writeNewRecord(outf, r, header);
-        }
-    }
+    //         // Parse the rest of the matrix
+    //         std::string line;
+    //         newMTXRecord r;
+    //         while (std::getline(inf, line))
+    //         {
+    //             parseMTXRecord(line, r, header);
+    //             writeMTXRecord(outf, r, header);
+    //         }
+    // }
 }

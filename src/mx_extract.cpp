@@ -1,5 +1,4 @@
 #include "Common.hpp"
-#include "MTX.h"
 #include <fstream>
 #include <string>
 #include <iostream>
@@ -152,221 +151,233 @@ bool validateProgramOptions_extract(MX_opt &opt)
 }
 
 // command
-
+// TODO handle when the index changes
 void mx_extract_file(MX_opt &opt)
 {
     // must be sorted by axis
     // Setup file direction in
-    std::streambuf *inbuf = nullptr;
-    std::ifstream infstream;
-    if (opt.stream_in)
-    {
-        inbuf = std::cin.rdbuf();
-    }
-    else
-    {
-        infstream.open(opt.files[0]); // only does the first file
-        inbuf = infstream.rdbuf();
-    }
-    std::istream inf(inbuf);
+    std::cout << "extract file" << std::endl;
+    // std::streambuf *inbuf = nullptr;
+    // std::ifstream infstream;
+    // if (opt.stream_in)
+    // {
+    //     inbuf = std::cin.rdbuf();
+    // }
+    // else
+    // {
+    //     infstream.open(opt.files[0]); // only does the first file
+    //     inbuf = infstream.rdbuf();
+    // }
+    // std::istream inf(inbuf);
 
-    // Setup file direction out
-    std::streambuf *buf = nullptr;
-    std::ofstream of;
-    if (opt.stream_out)
-    {
-        buf = std::cout.rdbuf();
-    }
-    else
-    {
-        of.open(opt.output);
-        buf = of.rdbuf();
-    }
-    std::ostream outf(buf);
+    // // Setup file direction out
+    // std::streambuf *buf = nullptr;
+    // std::ofstream of;
+    // if (opt.stream_out)
+    // {
+    //     buf = std::cout.rdbuf();
+    // }
+    // else
+    // {
+    //     of.open(opt.output);
+    //     buf = of.rdbuf();
+    // }
+    // std::ostream outf(buf);
 
-    //////////////////
-    int axis = opt.axis;
+    // //////////////////
+    // int axis = opt.axis;
 
-    MTXHeader header;
-    MTXRecord rp, r; // rp = r previous
+    // newMTXHeader h, nh; // nh = new h
+    // newMTXRecord rp, r; // rp = r previous
+    // int32_t nw = 0;     // num of (axis) elements written
 
-    parseHeader(inf, header);
+    // parseMTXHeader(inf, h);
+    // nh = h;
 
-    // read in file indices
-    std::unordered_map<int32_t, int32_t> extractList;
-    parseExtractList(opt.file, extractList);
-    // printExtractList(extractList);
+    // // set the idx_data equal to zero (there must be a better way to do this)
+    // for (int i = 0; i < nh.ndim; i++)
+    // {
+    //     // n cols etc = 0
+    //     nh.idx_data[i] = 0;
+    // }
+    // // number of nonzero = 0
+    // nh.idx_data[nh.ndim] = 0;
 
-    // TODO write header later
-    writeHeader(outf, header);
-    std::string line;
-    std::unordered_set<int> cols;
+    // // read in file indices
+    // std::unordered_map<int32_t, int32_t>
+    //     extractList;
+    // parseExtractList(opt.file, extractList);
+    // // printExtractList(extractList);
 
-    // get the first line
-    // parseRecord(line, rp);
+    // if (!opt.stream_out)
+    // {
+    //     writeMTXHeader(outf, h);
+    // }
+    // std::string line;
 
-    // get the rest of the lines
-    // make a record buffer so for all elements in the buffer (row / col) you can read and write them
-    int N = 100;
-    MTXRecord *p = new MTXRecord[N];
+    // // initial record (rp)
+    // std::getline(inf, line);
+    // parseMTXRecord(line, rp, nh);
 
-    // initial record (rp)
-    std::getline(inf, line);
-    parseRecord(line, rp);
-    while (std::getline(inf, line))
-    {
+    // while (std::getline(inf, line))
+    // {
 
-        // new record
-        // std::getline(inf, line);
-        parseRecord(line, r);
-        // printRecord(rp);
-        // printRecord(r);
+    //     // new record
+    //     parseMTXRecord(line, r, nh);
 
-        // search for rp
-        auto it = extractList.find(rp.row);
-        if (it == extractList.end())
-        {
-            // std::cout << rp.row << ", not found" << std::endl;
-        }
-        else
-        {
-            // if it exists, write it
-            writeRecord(outf, rp);
-            while (rp.row == r.row)
-            {
-                // if rp.row == r.row continue to write r
-                writeRecord(outf, r);
-                rp = r;
-                std::getline(inf, line);
-                parseRecord(line, r);
-            }
-        }
-        rp = r;
-    }
-
-    // fix the header
+    //     // search for rp
+    //     auto it = extractList.find(rp.idx[axis]);
+    //     if (it == extractList.end())
+    //     {
+    //     }
+    //     else
+    //     {
+    //         // if it exists, write it
+    //         nw++;
+    //         int old = rp.idx[axis];
+    //         trackIndex(rp, nh, nw, axis);
+    //         writeMTXRecord(outf, rp, nh);
+    //         while (old == r.idx[axis])
+    //         {
+    //             trackIndex(r, nh, nw, axis);
+    //             writeMTXRecord(outf, r, nh);
+    //             rp = r;
+    //             old = rp.idx[axis];
+    //             std::getline(inf, line);
+    //             parseMTXRecord(line, r, nh);
+    //         }
+    //     }
+    //     rp = r;
+    // }
+    // if (!opt.stream_out)
+    // {
+    //     // fix the header
+    //     outf.seekp(0);
+    //     writeMTXHeader(outf, nh);
+    // }
 }
 
 void mx_extract_index(MX_opt &opt)
 {
-    // must be sorted by axis
-    // Setup file direction in
-    std::streambuf *inbuf = nullptr;
-    std::ifstream infstream;
-    if (opt.stream_in)
-    {
-        inbuf = std::cin.rdbuf();
-    }
-    else
-    {
-        infstream.open(opt.files[0]); // only does the first file
-        inbuf = infstream.rdbuf();
-    }
-    std::istream inf(inbuf);
+    std::cout << "extract by index" << std::endl;
+    //     // must be sorted by axis
+    //     // Setup file direction in
+    //     std::streambuf *inbuf = nullptr;
+    //     std::ifstream infstream;
+    //     if (opt.stream_in)
+    //     {
+    //         inbuf = std::cin.rdbuf();
+    //     }
+    //     else
+    //     {
+    //         infstream.open(opt.files[0]); // only does the first file
+    //         inbuf = infstream.rdbuf();
+    //     }
+    //     std::istream inf(inbuf);
 
-    // Setup file direction out
-    std::streambuf *buf = nullptr;
-    std::ofstream of;
-    if (opt.stream_out)
-    {
-        buf = std::cout.rdbuf();
-    }
-    else
-    {
-        of.open(opt.output);
-        buf = of.rdbuf();
-    }
-    std::ostream outf(buf);
+    //     // Setup file direction out
+    //     std::streambuf *buf = nullptr;
+    //     std::ofstream of;
+    //     if (opt.stream_out)
+    //     {
+    //         buf = std::cout.rdbuf();
+    //     }
+    //     else
+    //     {
+    //         of.open(opt.output);
+    //         buf = of.rdbuf();
+    //     }
+    //     std::ostream outf(buf);
 
-    ///////////////////
-    int axis = opt.axis;
+    //     ///////////////////
+    //     int axis = opt.axis;
 
-    MTXHeader header;
-    MTXRecord r;
+    //     newMTXHeader header;
+    //     newMTXRecord r;
 
-    parseHeader(inf, header);
+    //     parseMTXHeader(inf, header);
 
-    int lower = opt.range.first;
-    int upper = opt.range.second;
-    if (upper == -1)
-    {
-        if (axis == 0)
-        {
-            upper = header.nrows;
-        }
-        else if (axis == 1)
-        {
-            upper = header.ncols;
-        }
-    }
+    //     int lower = opt.range.first;
+    //     int upper = opt.range.second;
+    //     if (upper == -1)
+    //     {
+    //         if (axis == 0)
+    //         {
+    //             upper = header.nrows;
+    //         }
+    //         else if (axis == 1)
+    //         {
+    //             upper = header.ncols;
+    //         }
+    //     }
 
-    // TODO write header later
-    writeHeader(outf, header);
-    std::string line;
-    std::unordered_set<int> cols;
+    //     // TODO write header later
+    //     writeMTXHeader(outf, header);
+    //     std::string line;
+    //     std::unordered_set<int> cols;
 
-    // get the first line
-    std::getline(inf, line);
-    std::stringstream ss(line);
-    ss >> r.row >> r.col >> r.val;
+    //     // get the first line
+    //     std::getline(inf, line);
+    //     std::stringstream ss(line);
+    //     ss >> r.row >> r.col >> r.val;
 
-    std::vector<int> idx, prev_idx;
-    idx.push_back(r.row);
-    idx.push_back(r.col);
-    prev_idx = idx;
-    cols.insert(r.col);
+    //     std::vector<int> idx, prev_idx;
+    //     idx.push_back(r.row);
+    //     idx.push_back(r.col);
+    //     prev_idx = idx;
+    //     cols.insert(r.col);
 
-    std::vector<int> vsize;
-    vsize.push_back(0);
-    vsize.push_back(0);
-    vsize.push_back(0);
+    //     std::vector<int> vsize;
+    //     vsize.push_back(0);
+    //     vsize.push_back(0);
+    //     vsize.push_back(0);
 
-    // Get first line
-    // subtract 1 since MTX is 1-indexed but I use 0-index for lower-upper range
-    if (idx[axis] - 1 >= lower && idx[axis] - 1 < upper)
-    {
-        vsize[axis]++;
-        outf << r.row << ' ' << r.col << ' ' << r.val << '\n';
+    //     // Get first line
+    //     // subtract 1 since MTX is 1-indexed but I use 0-index for lower-upper range
+    //     if (idx[axis] - 1 >= lower && idx[axis] - 1 < upper)
+    //     {
+    //         vsize[axis]++;
+    //         outf << r.row << ' ' << r.col << ' ' << r.val << '\n';
 
-        // add to col (row)
-        cols.insert(r.col);
-        vsize[(axis + 1) % 2]++;
-        vsize[vsize.size() - 1]++;
-    }
+    //         // add to col (row)
+    //         cols.insert(r.col);
+    //         vsize[(axis + 1) % 2]++;
+    //         vsize[vsize.size() - 1]++;
+    //     }
 
-    // get the rest of the lines
-    while (std::getline(inf, line))
-    {
-        std::stringstream ss(line);
-        ss >> r.row >> r.col >> r.val;
-        idx[0] = r.row;
-        idx[1] = r.col;
+    //     // get the rest of the lines
+    //     while (std::getline(inf, line))
+    //     {
+    //         std::stringstream ss(line);
+    //         ss >> r.row >> r.col >> r.val;
+    //         idx[0] = r.row;
+    //         idx[1] = r.col;
 
-        // subtract 1 since MTX is 1-indexed but I use 0-index for lower-upper range
-        if (idx[axis] - 1 >= lower && idx[axis] - 1 < upper)
-        {
+    //         // subtract 1 since MTX is 1-indexed but I use 0-index for lower-upper range
+    //         if (idx[axis] - 1 >= lower && idx[axis] - 1 < upper)
+    //         {
 
-            if (idx[axis] != prev_idx[axis])
-            {
-                vsize[axis]++;
-            }
+    //             if (idx[axis] != prev_idx[axis])
+    //             {
+    //                 vsize[axis]++;
+    //             }
 
-            // check if we've seen this col before
-            auto it = cols.find(r.col);
-            if (it == cols.end())
-            {
-                cols.insert(r.col);
-                vsize[((1 + axis) % 2)]++;
-            }
-            prev_idx = idx;
-            outf << r.row << ' ' << r.col << ' ' << r.val << '\n';
-            vsize[vsize.size() - 1]++;
-        }
-    }
-    // get straggler
-    // std::cout << vsize[axis] << ", " << vsize[((1 + axis) % 2)] << ", " << vsize[vsize.size() - 1] << std::endl;
+    //             // check if we've seen this col before
+    //             auto it = cols.find(r.col);
+    //             if (it == cols.end())
+    //             {
+    //                 cols.insert(r.col);
+    //                 vsize[((1 + axis) % 2)]++;
+    //             }
+    //             prev_idx = idx;
+    //             outf << r.row << ' ' << r.col << ' ' << r.val << '\n';
+    //             vsize[vsize.size() - 1]++;
+    //         }
+    //     }
+    //     // get straggler
+    //     // std::cout << vsize[axis] << ", " << vsize[((1 + axis) % 2)] << ", " << vsize[vsize.size() - 1] << std::endl;
 
-    // fix the header
+    //     // fix the header
 }
 
 // TODO update the header with new nrows/ncols/nzeros

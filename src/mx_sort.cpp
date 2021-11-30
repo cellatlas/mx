@@ -1,5 +1,4 @@
 #include "Common.hpp"
-#include "MTX.h"
 #include "getopt.h"
 
 #include <fstream>
@@ -82,7 +81,7 @@ bool validateProgramOptions_sort(MX_opt &opt)
 }
 // function
 
-// bool cmp_row(const newMTXRecord &a, const newMTXRecord &b)
+// bool cmp_row(const MTXRecord &a, const MTXRecord &b)
 // {
 //     if (a.row == b.row)
 //     {
@@ -94,7 +93,7 @@ bool validateProgramOptions_sort(MX_opt &opt)
 //     }
 // }
 
-// bool cmp_col(const newMTXRecord &a, const newMTXRecord &b)
+// bool cmp_col(const MTXRecord &a, const MTXRecord &b)
 // {
 // if (a.col == b.col)
 // {
@@ -106,7 +105,7 @@ bool validateProgramOptions_sort(MX_opt &opt)
 // }
 // }
 
-bool cmp_val(const newMTXRecord &a, const newMTXRecord &b)
+bool cmp_val(const MTXRecord &a, const MTXRecord &b)
 {
     return (a.value < b.value);
 }
@@ -120,8 +119,10 @@ class cmp
 public:
     cmp(int a, int nd) : axis(a), ndim(nd) {}
 
-    bool operator()(const newMTXRecord &a, const newMTXRecord &b)
+    bool operator()(const MTXRecord &a, const MTXRecord &b)
     {
+        // want this to go axis >> axis + 1 % %ndim >> axis +2 % ndim
+        // axis + i where i = 0 .. ndim
         // logic uses axis
         // for (int i = axis; i < (ndim + axis); i++)
         // {
@@ -168,8 +169,8 @@ void mx_sort(MX_opt &opt)
     }
     std::ostream outf(buf);
 
-    newMTXHeader header;
-    parseNewHeader(inf, header);
+    MTXHeader header;
+    parseMTXHeader(inf, header);
 
     int axis = opt.axis;
     auto cmp_func = cmp(axis, header.ndim);
@@ -178,13 +179,13 @@ void mx_sort(MX_opt &opt)
         auto cmp_func = cmp_val;
     }
 
-    newMTXRecord r;
-    std::vector<newMTXRecord> vec;
+    MTXRecord r;
+    std::vector<MTXRecord> vec;
     std::string line;
 
     while (std::getline(inf, line))
     {
-        parseNewRecord(line, r, header);
+        parseMTXRecord(line, r, header);
         vec.push_back(r);
     }
 
@@ -192,12 +193,12 @@ void mx_sort(MX_opt &opt)
 
     if (!opt.stream_out)
     {
-        writeNewHeader(outf, header);
+        writeMTXHeader(outf, header);
     }
 
     // entries
     for (int i = 0; i < vec.size(); i++)
     {
-        writeNewRecord(outf, vec[i], header);
+        writeMTXRecord(outf, vec[i], header);
     }
 }

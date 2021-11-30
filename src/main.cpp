@@ -7,6 +7,7 @@
 #include "mx_extract.h"  // mx_extract
 #include "mx_sample.h"   // mx_sample
 #include "mx_multiply.h" // mx_multiply
+#include "mx_text.h"     // mx_text
 
 #include <stdlib.h>
 #include <getopt.h>
@@ -18,9 +19,9 @@
 #include <vector>
 
 // Making a new sub-command:
-/* 
+/*
 Create new mx_subcmd.cpp and mx_subcmd.h file
-in mx_subcmd.cpp and mx_subcmd.h add 
+in mx_subcmd.cpp and mx_subcmd.h add
     - void displayProgramOptions_subcmd();
     - void parseProgramOptions_subcmd(int argc, char *argv[], MX_opt &opt);
     - bool validateProgramOptions_subcmd(MX_opt &opt);
@@ -47,6 +48,7 @@ void displayProgramOptions_MX()
               << "multiply          Multiply elements" << std::endl
               << "extract           Extract elements" << std::endl
               << "sample            Sample elements" << std::endl
+              << "text              Print matrix as text" << std::endl
               << std::endl
               << "Running mx <cmd> without arguments prints usage information for <cmd>"
               << std::endl
@@ -69,12 +71,14 @@ typedef struct
 
 const SubCommands functions[]{
     {"view", displayProgramOptions_view, parseProgramOptions_view, validateProgramOptions_view, mx_view},
-    {"shape", displayProgramOptions_shape, parseProgramOptions_view, validateProgramOptions_view, mx_shape},
+    {"shape", displayProgramOptions_text, parseProgramOptions_text, validateProgramOptions_text, mx_shape},
     {"sort", displayProgramOptions_sort, parseProgramOptions_sort, validateProgramOptions_sort, mx_sort},
     {"sum", displayProgramOptions_sum, parseProgramOptions_sum, validateProgramOptions_sum, mx_sum},
     {"extract", displayProgramOptions_extract, parseProgramOptions_extract, validateProgramOptions_extract, mx_extract},
     {"sample", displayProgramOptions_sample, parseProgramOptions_sample, validateProgramOptions_sample, mx_sample},
     {"multiply", displayProgramOptions_multiply, parseProgramOptions_multiply, validateProgramOptions_multiply, mx_multiply},
+    {"text", displayProgramOptions_text, parseProgramOptions_text, validateProgramOptions_text, mx_text},
+    {"fromtext", displayProgramOptions_text, parseProgramOptions_text, validateProgramOptions_text, mx_fromtext},
 };
 
 const int function_count = sizeof(functions) / sizeof(*functions);

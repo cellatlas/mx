@@ -1,5 +1,4 @@
 #include "Common.hpp"
-#include "MTX.h"
 #include "getopt.h"
 
 #include <fstream>  // std::ifstream
@@ -78,65 +77,100 @@ bool validateProgramOptions_sum(MX_opt &opt)
 
 // function
 
+// void file_direction(std::string &ifn, std::string &ofn, bool &stream_in, bool &stream_out, std::istream *&inf_ptr, std::ostream *&outf_ptr)
+// {
+//     // IN
+//     std::ifstream ifs;
+//     std::streambuf *ibuf = nullptr;
+//     if (stream_in)
+//     {
+//         ibuf = std::cin.rdbuf();
+//     }
+//     else
+//     {
+//         ifs.open(ifn, std::ios::in);
+//         ibuf = ifs.rdbuf();
+//     }
+//     std::istream inf(ibuf);
+//     inf_ptr = &inf;
+
+//     // OUT
+//     std::ofstream ofs;
+//     std::streambuf *obuf = nullptr;
+//     if (stream_out)
+//     {
+//         obuf = std::cout.rdbuf();
+//     }
+//     else
+//     {
+//         ofs.open(ofn);
+//         obuf = ofs.rdbuf();
+//     }
+//     std::ostream outf(obuf);
+//     outf_ptr = &outf;
+//     return;
+// }
+
 void mx_sum(MX_opt &opt)
 {
-    // Setup file direction in
-    std::streambuf *inbuf = nullptr;
-    std::ifstream infstream;
-    if (opt.stream_in)
-    {
-        inbuf = std::cin.rdbuf();
-    }
-    else
-    {
-        infstream.open(opt.files[0]); // only does the first file
-        inbuf = infstream.rdbuf();
-    }
-    std::istream inf(inbuf);
-
-    // Setup file direction out
-    std::streambuf *buf = nullptr;
-    std::ofstream of;
-    if (opt.stream_out)
-    {
-        buf = std::cout.rdbuf();
-    }
-    else
-    {
-        of.open(opt.output);
-        buf = of.rdbuf();
-    }
-    std::ostream outf(buf);
-
-    newMTXHeader header;
-    // problem: if streaming in then we dont have the header..
-    parseNewHeader(inf, header);
-
-    std::string line;
-    newMTXRecord prev_r, curr_r;
+    // Setup file direction in and out
+    std::ifstream ifs;
+    std::ofstream ofs;
+    std::streambuf *ibuf, *obuf = nullptr;
+    file_direction(opt.files[0], opt.output, opt.stream_in, opt.stream_out, ibuf, obuf, ifs, ofs);
+    std::istream inf(ibuf);
+    std::ostream outf(obuf);
 
     int axis = opt.axis;
 
-    // get first line
-    std::getline(inf, line);
-    parseNewRecord(line, prev_r, header);
+    size_t nr = 0;
+    size_t N = 100000;
+    MTXRecord *p = new MTXRecord[N];
+    char *buf = new char[N];
 
-    float s = prev_r.value;
+    // problem: if streaming in then we dont have the header..
+    MTXHeader header;
+    MTXRecord prev_r, curr_r;
+    std::string line;
 
-    // loop through file
-    while (std::getline(inf, line))
+    parseMTXHeader(inf, header);
+    std::getline(inf, line); // get first line
+    parseMTXRecord(line, prev_r, header);
+
+    int32_t s = prev_r.value;
+
+    while (true)
     {
-        parseNewRecord(line, curr_r, header);
-
-        if (curr_r.idx[axis] != prev_r.idx[axis])
+        inf.read((char *)p, N * sizeof(MTXRecord));
+        size_t rc = inf.gcount() / sizeof(MTXRecord);
+        if (rc == 0)
         {
-            outf << prev_r.idx[axis] << header.delim << s << '\n';
-            // outf.write((char *)&s, sizeof(s));
-            s = 0;
+            break;
         }
-        s += curr_r.value;
-        prev_r = curr_r;
+        for (size_t i = 0; i < rc; i++)
+        {
+            writeMTXRecord(std::cout, p[i], header);
+            // parseMTXRecord(p[i], curr_r, header);
+            // if (curr_r.idx[axis] != prev_r.idx[axis])
+            // {
+            //     outf << prev_r.idx[axis] << header.delim << s << '\n';
+            //     // outf.write((char *)&s, sizeof(s));
+            //     s = 0;
+            // }
+            // s += curr_r.value;
+            // prev_r = curr_r;
+            if (i > 10)
+            {
+                break;
+            }
+        }
+        break;
     }
-    // write out the straggler
-    outf << prev_r.idx[axis] << header.delim << s << '\n';
+
+    // // loop through file
+    // while (std::getline(inf, line))
+    // {
+    // }
+    // // write out the straggler
+    // // outf << prev_r.idx[axis] << header.delim << s << '\n';
 }
