@@ -81,36 +81,12 @@ bool validateProgramOptions_sort(MX_opt &opt)
 }
 // function
 
-// bool cmp_row(const MTXRecord &a, const MTXRecord &b)
-// {
-//     if (a.row == b.row)
-//     {
-//         return (a.col < b.col);
-//     }
-//     else
-//     {
-//         return (a.row < b.row);
-//     }
-// }
-
-// bool cmp_col(const MTXRecord &a, const MTXRecord &b)
-// {
-// if (a.col == b.col)
-// {
-//     return (a.row < b.row);
-// }
-// else
-// {
-//     return (a.col < b.col);
-// }
-// }
-
-bool cmp_val(const MTXRecord &a, const MTXRecord &b)
+bool cmp_val(const MXRecord &a, const MXRecord &b)
 {
     return (a.value < b.value);
 }
 
-// TODO, recursive strategy for comparator
+// // TODO, recursive strategy for comparator
 class cmp
 {
     int axis;
@@ -119,7 +95,7 @@ class cmp
 public:
     cmp(int a, int nd) : axis(a), ndim(nd) {}
 
-    bool operator()(const MTXRecord &a, const MTXRecord &b)
+    bool operator()(const MXRecord &a, const MXRecord &b)
     {
         // want this to go axis >> axis + 1 % %ndim >> axis +2 % ndim
         // axis + i where i = 0 .. ndim
@@ -141,64 +117,79 @@ public:
 
 void mx_sort(MX_opt &opt)
 {
-    // Setup file direction in
-    std::streambuf *inbuf = nullptr;
-    std::ifstream infstream;
-    if (opt.stream_in)
-    {
-        inbuf = std::cin.rdbuf();
-    }
-    else
-    {
-        infstream.open(opt.files[0]); // only does the first file
-        inbuf = infstream.rdbuf();
-    }
-    std::istream inf(inbuf);
+    // file direction
+    std::ifstream ifs;
+    std::ofstream ofs;
+    std::streambuf *ibuf, *obuf = nullptr;
+    file_direction(opt.files[0], opt.output, opt.stream_in, opt.stream_out, ibuf, obuf, ifs, ofs);
+    std::istream inf(ibuf);
+    std::ostream outf(obuf);
 
-    // Setup file direction out
-    std::streambuf *buf = nullptr;
-    std::ofstream of;
-    if (opt.stream_out)
-    {
-        buf = std::cout.rdbuf();
-    }
-    else
-    {
-        of.open(opt.output);
-        buf = of.rdbuf();
-    }
-    std::ostream outf(buf);
+    // read in header
+    MXHeader h;
+    MXRecord r;
+    readMXHeader(inf, h);
+    writeMXHeader(outf, h);
 
-    MTXHeader header;
-    parseMTXHeader(inf, header);
-
+    // pick comparator based on axis
     int axis = opt.axis;
-    auto cmp_func = cmp(axis, header.ndim);
+    auto cmp_func = cmp(axis, h.ndim);
     if (axis == -1)
     {
         auto cmp_func = cmp_val;
     }
 
-    MTXRecord r;
-    std::vector<MTXRecord> vec;
-    std::string line;
+    // vector to store records for sorting
+    std::vector<MXRecord> vec;
 
-    while (std::getline(inf, line))
+    // setup bulk parsing
+    std::string line;
+    size_t N = 1000;
+    size_t nr = 0;
+    int rc = 0;
+    MXRecord *p = new MXRecord[N];
+    bool readr = false;
+    while (true)
     {
-        parseMTXRecord(line, r, header);
-        vec.push_back(r);
+        // read in records
+        readr = readManyMXRecords(inf, p, h, N);
+        if (readr)
+        {
+            rc = inf.gcount() / sizeof(MXRecord);
+            nr += rc;
+            if (rc == 0)
+            {
+                break;
+            }
+
+            // main code change here
+            for (size_t i = 0; i < rc; i++)
+            {
+                // add each record to vector
+                vec.push_back(p[i]);
+            }
+        }
+
+        // no more records or error out then break
+        else
+        {
+            break;
+        }
     }
 
+    // sort records
     std::sort(vec.begin(), vec.end(), cmp_func);
 
-    if (!opt.stream_out)
-    {
-        writeMTXHeader(outf, header);
-    }
-
-    // entries
+    // write sorted records to ostream
     for (int i = 0; i < vec.size(); i++)
     {
-        writeMTXRecord(outf, vec[i], header);
+        writeMXRecord(outf, vec[i], h);
     }
+
+    // close ostream
+    if (!opt.stream_out)
+    {
+        ofs.close();
+    }
+    std::cerr << "Sorted " << nr << " records along axis " << axis << std::endl;
 }
