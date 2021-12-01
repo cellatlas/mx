@@ -1,4 +1,4 @@
-#include "Common.hpp" 
+#include "Common.hpp"
 
 // commands
 #include "operate/mx_multiply.h" // mx_multiply
@@ -63,6 +63,7 @@ void displayProgramOptions_MX()
     std::cout << "mx " << MX_VERSION << std::endl
               << std::endl
               << "Usage: mx <cmd> [arguments] ..." << std::endl
+              << std::endl
               << "where <cmd> can be one of: " << std::endl
               << std::endl;
 

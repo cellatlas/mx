@@ -5,20 +5,20 @@ To build `mx` run the following commands:
 ```
 $ git clone https://github.com/sbooeshaghi/mx.git
 $ cd mx; mkdir build; cd build
-$ g++ -std=c++11 ../src/*.cpp -o mx && cp mx /usr/local/bin
+$ g++ -std=c++11 ../src/**/*.cpp  -o mx && cp mx /usr/local/bin
 ```
 
 ```
-Usage: mx <CMD> [arguments] ...
+Usage: mx <cmd> [arguments] ...
 
-Where <CMD> can be one of:
+where <cmd> can be one of:
 
-view              View matrix
-shape             Print shape of matrix
-sort              Sort matrix
-sum               Sum elements across axis
-extract           Extract elements across axis
-sample            Sample elements across axis
+text            Convert .mx to .mtx
+fromtext        Convert .mtx to .mx
+shape           Print shape of matrix
+extract         Extract elements
+sum             Sum elements
+sort            Sort elements
 
-Running mx <CMD> without arguments prints usage information for <CMD>
+Running mx <cmd> without arguments prints usage information for <cmd>
 ```
