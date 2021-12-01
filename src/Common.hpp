@@ -1,8 +1,8 @@
 #ifndef COMMON_HPP
 #define COMMON_HPP
 
-#include "MTX.h"
-#include "MX.h"
+#include "formats/MTX.h"
+#include "formats/MX.h"
 
 #include <vector>
 #include <string>

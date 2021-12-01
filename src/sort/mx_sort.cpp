@@ -1,27 +1,29 @@
-#include "Common.hpp"
+#include "../Common.hpp"
 #include "getopt.h"
 
-#include <fstream>  // std::ifstream
-#include <string>   // string
-#include <sstream>  // stringstream
-#include <iostream> // std::cout
+#include <fstream>
+#include <iostream>
+#include <sstream>
 #include <vector>
+#include <functional> // std::function
+#include <algorithm>  // std::sort
 
 // display
-void displayProgramOptions_sum()
+void displayProgramOptions_sort()
 {
-    std::cout << "Usage: mx sum [options] mtx-files" << std::endl
+    std::cout << "Usage: mx sort [options] mtx-files" << std::endl
               << std::endl
               << "Options:" << std::endl
               << "-o, --output          File for output" << std::endl
-              << "-a, --axis=<integer>  Axis along which to sum" << std::endl
+              << "-a, --axis=<integer>  Axis along which to sort (default = 0)" << std::endl
               << "-p, --pipe            Pipe output to standard out" << std::endl
               << std::endl;
 }
-// parse
+
+// program options
 static int verbose_flag;
 
-void parseProgramOptions_sum(int argc, char *argv[], MX_opt &opt)
+void parseProgramOptions_sort(int argc, char *argv[], MX_opt &opt)
 {
     const char *optstring = "o:a:p";
     static struct option long_options[] =
@@ -52,6 +54,7 @@ void parseProgramOptions_sum(int argc, char *argv[], MX_opt &opt)
             break;
         }
     }
+
     if (verbose_flag)
     {
         std::cout << "Verbose flag is set" << std::endl;
@@ -63,31 +66,57 @@ void parseProgramOptions_sum(int argc, char *argv[], MX_opt &opt)
     {
         opt.files.push_back(argv[optind++]);
     }
+
     if (opt.files.size() == 1 && opt.files[0] == "-")
     {
         opt.stream_in = true;
     }
 }
+
 // validate
-bool validateProgramOptions_sum(MX_opt &opt)
+bool validateProgramOptions_sort(MX_opt &opt)
 {
     bool ret = true;
     return ret;
 }
-
 // function
 
-void mx_sum(MX_opt &opt)
+bool cmp_val(const MXRecord &a, const MXRecord &b)
 {
-    std::cerr << ".mx file must be sorted along axis " << opt.axis << std::endl;
-    /// Notes for Angel
-    // for summing along axis i, mx file must be sorted first
-    // along that axis
-    // read in header
-    // read in mtx records
-    // iterate through records
-    /// End notes for Angel
+    return (a.value < b.value);
+}
 
+// // TODO, recursive strategy for comparator
+class cmp
+{
+    int axis;
+    int ndim;
+
+public:
+    cmp(int a, int nd) : axis(a), ndim(nd) {}
+
+    bool operator()(const MXRecord &a, const MXRecord &b)
+    {
+        // want this to go axis >> axis + 1 % %ndim >> axis +2 % ndim
+        // axis + i where i = 0 .. ndim
+        // logic uses axis
+        // for (int i = axis; i < (ndim + axis); i++)
+        // {
+        //     int m = i % ndim;
+        // }
+        if (a.idx[axis % ndim] == b.idx[axis % ndim])
+        {
+            return (a.idx[(axis + 1) % ndim] < b.idx[(axis + 1) % ndim]);
+        }
+        else
+        {
+            return (a.idx[axis % ndim] < b.idx[axis % ndim]);
+        }
+    }
+};
+
+void mx_sort(MX_opt &opt)
+{
     // file direction
     std::ifstream ifs;
     std::ofstream ofs;
@@ -100,12 +129,18 @@ void mx_sum(MX_opt &opt)
     MXHeader h;
     MXRecord r;
     readMXHeader(inf, h);
+    writeMXHeader(outf, h);
 
-    // set axis along which to sum
+    // pick comparator based on axis
     int axis = opt.axis;
+    auto cmp_func = cmp(axis, h.ndim);
+    if (axis == -1)
+    {
+        auto cmp_func = cmp_val;
+    }
 
-    // storage for summed value
-    int32_t sum;
+    // vector to store records for sorting
+    std::vector<MXRecord> vec;
 
     // setup bulk parsing
     std::string line;
@@ -130,11 +165,8 @@ void mx_sum(MX_opt &opt)
             // main code change here
             for (size_t i = 0; i < rc; i++)
             {
-                // do summing here
-                // if p[i].idx[axis] is diff from p[i+1].idx[axis]
-                // write sum
-                // restart sum
-                // else sum += p[i].idx[axis]
+                // add each record to vector
+                vec.push_back(p[i]);
             }
         }
 
@@ -145,10 +177,19 @@ void mx_sum(MX_opt &opt)
         }
     }
 
+    // sort records
+    std::sort(vec.begin(), vec.end(), cmp_func);
+
+    // write sorted records to ostream
+    for (int i = 0; i < vec.size(); i++)
+    {
+        writeMXRecord(outf, vec[i], h);
+    }
+
     // close ostream
     if (!opt.stream_out)
     {
         ofs.close();
     }
-    std::cerr << "Parsed " << nr << " records" << std::endl;
+    std::cerr << nr << " records sorted along axis " << axis << std::endl;
 }

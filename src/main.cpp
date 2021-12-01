@@ -1,13 +1,12 @@
-#include "Common.hpp" // MX_opt is here
+#include "Common.hpp" 
 
 // commands
-#include "mx_view.h"     // mx_view
-#include "mx_sum.h"      // mx_sum
-#include "mx_sort.h"     // mx_sort
-#include "mx_extract.h"  // mx_extract
-#include "mx_sample.h"   // mx_sample
-#include "mx_multiply.h" // mx_multiply
-#include "mx_text.h"     // mx_text
+#include "operate/mx_multiply.h" // mx_multiply
+#include "operate/mx_sum.h"      // mx_sum
+#include "extract/mx_extract.h"  // mx_extract
+#include "sort/mx_sort.h"        // mx_sort
+#include "text/mx_text.h"        // mx_text
+#include "sample/mx_sample.h"    // mx_sample
 
 #include <stdlib.h>
 #include <getopt.h>
@@ -35,7 +34,6 @@ in main.cpp add subcmd to functions list
 */
 
 // TODO: fix input subcommands taking in multiple files
-// vs just stdin, ie clean up code
 
 // Setting up dictionary for easy command execution
 // in our SubCommands type, we can reference a function by its name
@@ -67,6 +65,8 @@ void displayProgramOptions_MX()
               << "Usage: mx <cmd> [arguments] ..." << std::endl
               << "where <cmd> can be one of: " << std::endl
               << std::endl;
+
+    // print rest of command descriptions
     std::string subcmd, subcmd_sp;
     for (auto &ele : functions)
     {
@@ -74,8 +74,8 @@ void displayProgramOptions_MX()
         stringify(ele.subcmd, subcmd_sp);
         std::cout << subcmd_sp << ele.description << std::endl;
     }
-    std::cout << std::endl;
 
+    std::cout << std::endl;
     std::cout << "Running mx <cmd> without arguments prints usage information for <cmd>" << std::endl
               << std::endl;
 }
@@ -103,6 +103,7 @@ int main(int argc, char *argv[])
                 functions[nc].display();
                 exit(0);
             }
+
             functions[nc].parse(argc - 1, argv + 1, opt);
             if (functions[nc].validate(opt))
             {
@@ -114,9 +115,11 @@ int main(int argc, char *argv[])
                 functions[nc].display();
                 exit(1);
             }
+
             break;
         }
     }
+
     if (!command_found)
     {
         std::cerr << "mx command not found: " << cmd << std::endl;

@@ -1,4 +1,4 @@
-#include "Common.hpp"
+#include "../Common.hpp"
 
 void displayProgramOptions_sort();
 void parseProgramOptions_sort(int argc, char *argv[], MX_opt &opt);

@@ -1,4 +1,4 @@
-#include "Common.hpp"
+#include "../Common.hpp"
 
 void displayProgramOptions_sum();
 void parseProgramOptions_sum(int argc, char *argv[], MX_opt &opt);

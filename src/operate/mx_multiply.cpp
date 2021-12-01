@@ -1,4 +1,5 @@
-#include "Common.hpp"
+#include "../Common.hpp"
+
 #include "getopt.h"
 
 #include <fstream>  // std::ifstream

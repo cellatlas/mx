@@ -1,5 +1,5 @@
-#include "MTX.h"
-#include "MX.h"
+#include "formats/MTX.h"
+#include "formats/MX.h"
 
 #include <iostream>
 #include <fstream>

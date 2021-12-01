@@ -1,5 +1,6 @@
-#include <iostream>
 #include "MX.h"
+
+#include <iostream>
 
 void readMXHeader(std::istream &inf, MXHeader &header)
 {

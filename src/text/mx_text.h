@@ -1,4 +1,4 @@
-#include "Common.hpp"
+#include "../Common.hpp"
 
 void displayProgramOptions_text();
 void parseProgramOptions_text(int argc, char *argv[], MX_opt &opt);
