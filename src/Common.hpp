@@ -51,4 +51,6 @@ void buildMTXHeaderOptions_inv(std::unordered_map<std::string, std::unordered_ma
 
 bool parseExtractList(const std::string &filename, std::unordered_map<int32_t, int32_t> &extractList);
 void printExtractList(std::unordered_map<int32_t, int32_t> &extractList);
+
+void printMatrix(int &n_pts, int &n_dim, double **&data);
 #endif

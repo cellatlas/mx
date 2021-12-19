@@ -176,3 +176,17 @@ void printExtractList(std::unordered_map<int32_t, int32_t> &m)
         std::cout << i.first << ", " << i.second << std::endl;
     }
 }
+
+void printMatrix(int &n_pts, int &n_dim, double **&data)
+{
+    for (int i = 0; i < n_pts; i++)
+    {
+        for (int j = 0; j < n_dim; j++)
+        {
+            std::cout << data[i][j] << " ";
+        }
+        std::cout << std::endl;
+    }
+}
+
+// void writeFilterMeans(std::ostream &outf, )

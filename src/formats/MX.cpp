@@ -28,3 +28,12 @@ void writeMXRecord(std::ostream &outf, MXRecord &record, MXHeader &header)
 {
     outf.write((char *)&record, sizeof(record));
 }
+
+void printMXRecord(std::ostream &outf, MXRecord &record, MXHeader &header)
+{
+    for (int i = 0; i < header.ndim; i++)
+    {
+        outf << record.idx[i] << " ";
+    }
+    outf << record.value << "\n";
+}

@@ -7,6 +7,7 @@
 #include "sort/mx_sort.h"        // mx_sort
 #include "text/mx_text.h"        // mx_text
 #include "sample/mx_sample.h"    // mx_sample
+#include "filter/mx_filter.h"    // mx_filter
 
 #include <stdlib.h>
 #include <getopt.h>
@@ -50,10 +51,11 @@ typedef struct
 const SubCommands functions[]{
     {"text", "Convert .mx to .mtx", displayProgramOptions_text, parseProgramOptions_text, validateProgramOptions_text, mx_text},
     {"fromtext", "Convert .mtx to .mx", displayProgramOptions_text, parseProgramOptions_text, validateProgramOptions_text, mx_fromtext},
-    {"shape", "Print shape of matrix", displayProgramOptions_shape, parseProgramOptions_text, validateProgramOptions_text, mx_shape},
     {"extract", "Extract elements", displayProgramOptions_extract, parseProgramOptions_extract, validateProgramOptions_extract, mx_extract},
-    {"sum", "Sum elements", displayProgramOptions_sum, parseProgramOptions_sum, validateProgramOptions_sum, mx_sum},
     {"sort", "Sort elements", displayProgramOptions_sort, parseProgramOptions_sort, validateProgramOptions_sort, mx_sort},
+    {"shape", "Print shape of matrix", displayProgramOptions_shape, parseProgramOptions_text, validateProgramOptions_text, mx_shape},
+    {"sum", "Sum elements", displayProgramOptions_sum, parseProgramOptions_sum, validateProgramOptions_sum, mx_sum},
+    {"filter", "Filter on summed counts", displayProgramOptions_filter, parseProgramOptions_filter, validateProgramOptions_filter, mx_filter},
 };
 
 const int function_count = sizeof(functions) / sizeof(*functions);
