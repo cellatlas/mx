@@ -101,12 +101,27 @@ void mx_sum(MX_opt &opt)
     MXHeader h;
     MXRecord r;
     readMXHeader(inf, h);
-
-    // set axis along which to sum
     int axis = opt.axis;
 
-    // storage for summed value
-    int32_t sum;
+    // filter variables
+    std::string type_covariance = "full"; // <-> "diagonal"
+    int n_pts = h.idx_data[axis];         // number of points
+    int n_dim = 1;                        // dimension of space
+    int n_itr = 200;                      // number of EM iterations
+    int n_ctr = 2;                        // number of centroids
+    double **data = new double *[n_pts];  // container for points
+    for (int i = 0; i < n_pts; i++)
+    {
+        data[i] = new double[n_dim]; // make space for the data
+        data[i][0] = 0;
+    }
+
+    int pidx = 0;
+    size_t j = 0;
+    int idx_diff = 0;
+    std::string means_fn = opt.output + "means.txt";
+    std::string assignments_fn = opt.output + "assignments.txt";
+    MXRecord *m = new MXRecord[h.idx_data[h.ndim]];
 
     // setup bulk parsing
     std::string line;
@@ -122,24 +137,36 @@ void mx_sum(MX_opt &opt)
         if (readr)
         {
             rc = inf.gcount() / sizeof(MXRecord);
-            nr += rc;
             if (rc == 0)
             {
                 break;
             }
 
             // main code change here
-            for (size_t i = 0; i < rc; i++)
+            for (size_t i = 0; i < rc;)
             {
-                // do summing here
-                // if p[i].idx[axis] is diff from p[i+1].idx[axis]
-                // write sum
-                // restart sum
-                // else sum += p[i].idx[axis]
+                m[i + nr] = p[i];
+                data[pidx][0] += p[i].value;
+                j = i + 1;
+                for (; j < rc; j++)
+                {
+                    m[j + nr] = p[j];
+                    idx_diff = p[j].idx[axis] - p[i].idx[axis];
+                    if (idx_diff > 0)
+                    {
+                        // make the value log(x + 1)
+                        data[pidx][0] = std::log(data[pidx][0]);
+                        pidx += idx_diff;
+                        break;
+                    }
+                    data[pidx][0] += p[j].value;
+                }
+                // increase the index
+                i = j;
             }
+            nr += rc;
         }
 
-        // no more records or error out then break
         else
         {
             break;

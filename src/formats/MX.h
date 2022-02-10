@@ -26,5 +26,6 @@ bool readMXRecord(std::istream &inf, MXRecord &record, MXHeader &header);
 bool readMXRecord(std::istream &inf, MXRecord &record, MXHeader &header);
 bool readManyMXRecords(std::istream &inf, MXRecord *&records, MXHeader &header, size_t &N);
 void printMXRecord(std::ostream &outf, MXRecord &record, MXHeader &header);
+void sumMXRecords(int axis, int n_val, MXRecord *p, double **data, bool log);
 
 #endif
