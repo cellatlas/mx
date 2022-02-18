@@ -4,13 +4,13 @@
 mx norm [options] mx-file
 ```
 
-normalize the matrix
+Normalize the matrix.
 
 ## Options
 
 `-m`, `--method`
 
-The method to normalize the matrix,
+The method used to normalize the matrix.
 
 `-o`, `--output`
 
