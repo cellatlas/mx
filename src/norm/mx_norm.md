@@ -10,7 +10,11 @@ Normalize the matrix.
 
 `-m`, `--method`
 
-The method used to normalize the matrix.
+The method used to normalize the matrix. Options include `log1p` and `pf`. If `pf` is selected, the size factor must by provided to `-sf`.
+
+`-sf`, `--size-factor`
+
+Multiply all entries by this value
 
 `-o`, `--output`
 
