@@ -4,9 +4,13 @@
 mx clean [options] mx-file
 ```
 
-Drops rows and columns where all elements are zero
+Drops rows and/or columns where all elements are zero
 
 ## Options
+
+`-a`, `--axis`
+
+The axis to drop elements from (0: rows, 1: cols, -1: rows and cols)
 
 `-mi`, `--input-metadata-files`
 
