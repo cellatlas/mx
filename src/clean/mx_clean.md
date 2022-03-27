@@ -27,6 +27,6 @@ The name of the output mx file
 ## Examples
 
 ```bash
-$ mx clean -mi barcodes.txt,genes.txt -mo clean_barcodes.txt,clean_genes.txt -o clean.mx matrix.mx
+$ mx clean -a -1 -mi barcodes.txt,genes.txt -mo clean_barcodes.txt,clean_genes.txt -o clean.mx matrix.mx
 # drops rows and columns that sum to zeros
 ```
