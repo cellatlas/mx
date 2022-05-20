@@ -20,8 +20,8 @@ $ mx inspect -o metrics.json matrix.mx
  ncells: X, #, number of cels
  ngenes: X, #, number of genes
  nzeros: X: #, number of zeros
- sparsity: 0.XX, # fraction of zeros(nzeros/(ncells*ngenes))
- total_count: XX, # sum of counts in whole matrix
+ density: 0.XX, # fraction of zeros(nzeros/(ncells*ngenes))
+ total_counts: XX, # sum of counts in whole matrix
  avg_per_cell: XX, # mean number of counts per cell
  avg_per_gene: XX, # mean number of counts per gene
  med_per_cell: XX, # median number of counts per cell

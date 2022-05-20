@@ -2,12 +2,14 @@
 
 // commands
 #include "operate/mx_multiply.h" // mx_multiply
-#include "operate/mx_sum.h"      // mx_sum
+#include "compute/mx_sum.h"      // mx_sum
 #include "extract/mx_extract.h"  // mx_extract
 #include "sort/mx_sort.h"        // mx_sort
 #include "text/mx_text.h"        // mx_text
 #include "sample/mx_sample.h"    // mx_sample
-#include "filter/mx_filter.h"    // mx_filter
+// #include "filter/mx_filter.h"     // mx_filter
+#include "collapse/mx_collapse.h" // mx_collapse
+#include "inspect/mx_inspect.h"   // mx_inspect
 
 #include <stdlib.h>
 #include <getopt.h>
@@ -55,7 +57,9 @@ const SubCommands functions[]{
     {"sort", "Sort elements", displayProgramOptions_sort, parseProgramOptions_sort, validateProgramOptions_sort, mx_sort},
     {"shape", "Print shape of matrix", displayProgramOptions_shape, parseProgramOptions_text, validateProgramOptions_text, mx_shape},
     {"sum", "Sum elements", displayProgramOptions_sum, parseProgramOptions_sum, validateProgramOptions_sum, mx_sum},
-    {"filter", "Filter on summed counts", displayProgramOptions_filter, parseProgramOptions_filter, validateProgramOptions_filter, mx_filter},
+    // {"filter", "Filter on summed counts", displayProgramOptions_filter, parseProgramOptions_filter, validateProgramOptions_filter, mx_filter},
+    {"collapse", "Collapse along axis", displayProgramOptions_collapse, parseProgramOptions_collapse, validateProgramOptions_collapse, mx_collapse},
+    {"inspect", "Inspect matrix", displayProgramOptions_inspect, parseProgramOptions_inspect, validateProgramOptions_inspect, mx_inspect},
 };
 
 const int function_count = sizeof(functions) / sizeof(*functions);

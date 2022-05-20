@@ -31,6 +31,9 @@ struct MX_opt
     std::pair<int, int> range;
     std::vector<int> elements;
 
+    // norm
+    std::string method;
+
     // sample
     int k_samples;
 

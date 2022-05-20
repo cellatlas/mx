@@ -1,7 +1,7 @@
-# mx clean
+# mx collapse
 
 ```bash
-mx clean [options] mx-file
+mx collapse [options] mx-file
 ```
 
 Drops rows and/or columns where all elements are zero
@@ -27,6 +27,6 @@ The name of the output mx file
 ## Examples
 
 ```bash
-$ mx clean -a -1 -mi barcodes.txt,genes.txt -mo clean_barcodes.txt,clean_genes.txt -o clean.mx matrix.mx
+$ mx collapse -a -1 -mi barcodes.txt,genes.txt -mo collapse_barcodes.txt,collapse_genes.txt -o collapse.mx matrix.mx
 # drops rows and columns that sum to zeros
 ```
