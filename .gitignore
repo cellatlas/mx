@@ -4,3 +4,4 @@ CMakeFiles
 release
 .DS_Store
 *.o
+test/

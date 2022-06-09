@@ -1,8 +1,7 @@
 import sys
 import argparse
 
-from mx.mx_diff import mx_diff
-
+from .mx_diff import mx_diff
 from .mx_inspect import mx_inspect
 from .mx_filter import mx_filter
 from .mx_normalize import mx_normalize
