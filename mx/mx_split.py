@@ -28,4 +28,6 @@ def mx_split(matrix_fn, bcs_fn, genes_fn, assignments_fn, output_fn):
             os.path.join(out_path, "barcodes.txt"), np.array(barcodes)[mask].tolist()
         )
 
+        write_list(os.path.join(out_path, "genes.txt"), genes)
+
     return
