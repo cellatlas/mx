@@ -4,12 +4,12 @@ from .utils import read_str_list, write_list
 from scipy.io import mmread, mmwrite
 
 
-def mx_split(matrix_fn, bcs_in_fn, genes_in_fn, assignments_fn, output_fn):
+def mx_split(matrix_fn, bcs_fn, genes_fn, assignments_fn, output_fn):
     mtx = mmread(matrix_fn).tocsr()
     genes = []
     read_str_list(genes_fn, genes)
     barcodes = []
-    read_str_list(barcodes_fn, barcodes)
+    read_str_list(bcs_fn, barcodes)
 
     assignments = []
     read_str_list(assignments_fn, assignments)
