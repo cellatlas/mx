@@ -19,6 +19,8 @@ def mx_split(matrix_fn, bcs_fn, genes_fn, assignments_fn, output_fn):
         mask = np.array(assignments) == a
 
         out_path = os.path.join(output_fn, a)
+        if not os.path.exists(out_path):
+            os.makedirs(out_path)
         # write matrix
         mmwrite(os.path.join(out_path, "matrix.mtx"), mtx[mask])
         # write barcodes
