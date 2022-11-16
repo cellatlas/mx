@@ -7,6 +7,7 @@ from .mx_filter import mx_filter
 from .mx_normalize import mx_normalize
 from .mx_extract import mx_extract
 from .mx_clean import mx_clean
+from .mx_split import mx_split
 from .mx_assign import mx_assign_fn
 
 
@@ -299,6 +300,52 @@ def main():
     parser_diff.add_argument(
         "matrix", metavar="matrix.mtx", type=str, help="Path to matrix.mtx file"
     )
+    # Split ###################################################
+    split_info = "Split matrix by assignments"
+    parser_split = subparsers.add_parser(
+        "split", description=split_info, help=split_info, add_help=True
+    )
+
+    # split subparser arguments
+    parser_split.add_argument(
+        "-a",
+        "--assignments",
+        default=None,
+        type=str,
+        required=True,
+        help="Input path for assignments.txt",
+    )
+    # split subparser arguments
+    parser_split.add_argument(
+        "-gi",
+        "--genes-in",
+        default=None,
+        type=str,
+        required=True,
+        help="Input path for genes.txt",
+    )
+    # split subparser arguments
+    parser_split.add_argument(
+        "-bi",
+        "--bcs-in",
+        default=None,
+        type=str,
+        required=True,
+        help="Input path for bcs.txt",
+    )
+
+    parser_split.add_argument(
+        "-o",
+        "--output",
+        default=None,
+        type=str,
+        required=True,
+        help="Output path to save matrix",
+    )
+
+    parser_split.add_argument(
+        "matrix", metavar="matrix.mtx", type=str, help="Path to matrix.mtx file"
+    )
 
     if len(sys.argv) == 1:
         parser.print_help()
@@ -347,6 +394,8 @@ def main():
         )
     elif args.command == "diff":
         mx_diff(args.matrix, args.bcs_in, args.genes_in, args.assignments, args.output)
+    elif args.command == "split":
+        mx_split(args.matrix, args.bcs_in, args.genes_in, args.assignments, args.output)
 
 
 if __name__ == "__main__":

@@ -6,3 +6,7 @@ build:
 
 clean:
 	rm -rf build
+	rm -rf dist
+	rm -rf mx.egg-info
+	rm -rf docs/_build
+	rm -rf docs/api
