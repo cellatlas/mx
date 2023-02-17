@@ -80,6 +80,10 @@ def main():
         "matrix", metavar="matrix.mtx", type=str, help="Path to matrix.mtx file"
     )
 
+
+    parser_normalize.add_argument(
+            "--pfonly", action="store_true", help="Perfom PF only")
+
     # Extract ###################################################
     extract_info = "Extract submatrix of genes"
     parser_extract = subparsers.add_parser(
@@ -363,7 +367,10 @@ def main():
             select_axis=None,  # if you want to do the knee only on certain columns
         )
     elif args.command == "normalize":
-        mx_normalize(args.matrix, args.output)
+        if args.pfonly:
+            mx_normalize(args.matrix, args.output, args.pfonly)
+        else:
+            mx_normalize(args.matrix, args.output)
     elif args.command == "extract":
         mx_extract(
             args.matrix,
