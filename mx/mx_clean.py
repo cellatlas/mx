@@ -21,9 +21,9 @@ def mx_clean(
     mtx = mtx[nonzero_cells].copy()
 
     # check if any genes are zero NB: if genes end up getting dropped, will have to handle that in the EC files
-    nonzero_genes = np.where(mtx.sum(0).A.ravel() != 0)[0]
-    print(f"Dropping {mtx.shape[1] - len(nonzero_genes)} genes")
-    mtx = mtx[:, nonzero_genes].copy()
+    #nonzero_genes = np.where(mtx.sum(0).A.ravel() != 0)[0]
+    #print(f"Dropping {mtx.shape[1] - len(nonzero_genes)} genes")
+    #mtx = mtx[:, nonzero_genes].copy()
 
     mmwrite(matrix_out_fn, mtx)
     write_list(genes_out_fn, np.array(genes)[nonzero_genes].tolist())
