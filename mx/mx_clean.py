@@ -26,5 +26,5 @@ def mx_clean(
     #mtx = mtx[:, nonzero_genes].copy()
 
     mmwrite(matrix_out_fn, mtx)
-    write_list(genes_out_fn, np.array(genes))
+    write_list(genes_out_fn, genes) # np.array(genes)[nonzero_genes].tolist())
     write_list(barcodes_out_fn, np.array(barcodes)[nonzero_cells].tolist())
