@@ -60,7 +60,7 @@ def main():
         "matrix", metavar="matrix.mtx", type=str, help="Path to matrix.mtx file"
     )
 
-    # Normlize ###################################################
+    # Normalize ###################################################
     normalize_info = "Normalize matrix with PFlog1pPF"
     parser_normalize = subparsers.add_parser(
         "normalize", description=normalize_info, help=normalize_info, add_help=True
