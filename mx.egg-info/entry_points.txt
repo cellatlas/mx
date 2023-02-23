@@ -1,0 +1,2 @@
+[console_scripts]
+mx = mx.main:main

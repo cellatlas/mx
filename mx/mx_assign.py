@@ -885,6 +885,9 @@ def _estimate_gaussian_parameters(X, resp, reg_covar, covariance_type, B=None):
             if jdx not in marker_gene_indices[idx]:
                 new = 0  # min(b, ct_min / f)
                 means[idx][jdx] = new
+#             else:
+#                 if means[idx][jdx] == 0:
+#                     means[idx][jdx] = 1e-8
 
     covariances = {
         "full": _estimate_gaussian_covariances_full,
