@@ -12,6 +12,59 @@ logger.setLevel(logging.INFO)
 logging.basicConfig(format="%(asctime)s - %(message)s", datefmt="%d-%b-%y %H:%M:%S")
 
 
+def setup_mx_diff_args(parser):
+    diff_info = "Differential Expression"
+    parser_diff = parser.add_parser(
+        "diff", description=diff_info, help=diff_info, add_help=True
+    )
+
+    # diff subparser arguments
+    parser_diff.add_argument(
+        "-a",
+        "--assignments",
+        default=None,
+        type=str,
+        required=True,
+        help="Input path for assignments.txt",
+    )
+    # diff subparser arguments
+    parser_diff.add_argument(
+        "-gi",
+        "--genes-in",
+        default=None,
+        type=str,
+        required=True,
+        help="Input path for genes.txt",
+    )
+    # diff subparser arguments
+    parser_diff.add_argument(
+        "-bi",
+        "--bcs-in",
+        default=None,
+        type=str,
+        required=True,
+        help="Input path for bcs.txt",
+    )
+
+    parser_diff.add_argument(
+        "-o",
+        "--output",
+        default=None,
+        type=str,
+        required=True,
+        help="Output path to save matrix",
+    )
+
+    parser_diff.add_argument(
+        "matrix", metavar="matrix.mtx", type=str, help="Path to matrix.mtx file"
+    )
+    return parser_diff
+
+
+def validate_mx_diff_args(parser, args):
+    run_mx_diff(args.matrix, args.bcs_in, args.genes_in, args.assignments, args.output)
+
+
 def split_by_target(mat, targets, target, axis=0):
     """
     Split the rows of mat by the proper assignment
@@ -100,8 +153,7 @@ def dexpress(mat, components, features, assignments, **kwargs):
         effect_size = np.nan
 
         means = t_mat.mean(0).ravel()
-        ranks = means.shape[0] - rankdata(means) # also make rankdata as frac
-        
+        ranks = means.shape[0] - rankdata(means)  # also make rankdata as frac
 
         test = ttest_ind(t_mat, c_mat, nan_policy="propagate", equal_var=False)
         ct_nnz = (t_mat > 0).sum(0).ravel()
@@ -170,31 +222,36 @@ def make_table(assignments, features, p_raw, p_corr, es, nnz, nnz_frac, rank, me
     return markers
 
 
-def mx_diff(matrix_fn, bcs_fn, genes_fn, assignments_fn, degs_fn):
-    matrix = mmread(matrix_fn).A
-    components = []
-    read_str_list(bcs_fn, components)
-    components = np.array(components)
+def run_mx_diff(matrix_fn, bcs_fn, genes_fn, assignments_fn, degs_fn):
+    mtx = mmread(matrix_fn).A
+    barcodes = []
+    read_str_list(bcs_fn, barcodes)
+    barcodes = np.array(barcodes)
 
-    features = []
-    read_str_list(genes_fn, features)
-    features = np.array(features)
+    genes = []
+    read_str_list(genes_fn, genes)
+    genes = np.array(genes)
     assignments = pd.read_csv(assignments_fn, sep="\t", index_col=0)["label"].values
 
+    markers_gene = mx_diff(mtx, barcodes, genes, assignments)
+    markers_gene.to_csv(degs_fn, sep="\t", index=False)
+
+
+def mx_diff(mtx, bcs, genes, assignments):
     nan_cutoff = 0.1  # of elements in cluster
     corr_method = "bonferroni"
     # (pval, stat, es, nfeatures, nnz, nnz_frac, rank, mean)
     p_raw, stat, es, nfeat, nnz, nnz_frac, rank, mean = dexpress(
-        matrix, components, features, assignments, nan_cutoff=nan_cutoff
+        mtx, bcs, genes, assignments, nan_cutoff=nan_cutoff
     )
     p_raw = p_raw / 2
     p_corr = correct_pval(p_raw, nfeat, corr_method)
 
     markers_gene = make_table(
-        assignments, features, p_raw, p_corr, es, nnz, nnz_frac, rank, mean
+        assignments, genes, p_raw, p_corr, es, nnz, nnz_frac, rank, mean
     )
 
     # convert the 0 pvalues to the smallest possible float
     markers_gene["p_corr"][markers_gene.eval("p_corr == 0").values] = sys.float_info.min
     markers_gene = markers_gene.query("log_fc > 0").query("p_corr < 0.05")
-    markers_gene.to_csv(degs_fn, sep="\t", index=False)
+    return markers_gene

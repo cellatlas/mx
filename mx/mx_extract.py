@@ -3,17 +3,81 @@ from .utils import read_str_list, write_list
 import numpy as np
 
 
-def mx_extract(matrix_fn, genes_in_fn, targets_fn, genes_out_fn, output_fn):
+def setup_mx_extract_args(parser):
+    extract_info = "Extract submatrix of genes"
+    parser_extract = parser.add_parser(
+        "extract", description=extract_info, help=extract_info, add_help=True
+    )
+    parser_extract.add_argument(
+        "-t",
+        "--targets",
+        default=None,
+        type=str,
+        required=True,
+        help="Path to targets file to extract",
+    )
 
-    # read in targets.txt
+    # extract subparser arguments
+    parser_extract.add_argument(
+        "-gi",
+        "--genes-in",
+        default=None,
+        type=str,
+        required=True,
+        help="Input path for genes.txt",
+    )
+    parser_extract.add_argument(
+        "-go",
+        "--genes-out",
+        default=None,
+        type=str,
+        required=True,
+        help="Output path for genes.txt",
+    )
+
+    parser_extract.add_argument(
+        "-o",
+        "--output",
+        default=None,
+        type=str,
+        required=True,
+        help="Output path to save matrix",
+    )
+
+    parser_extract.add_argument(
+        "matrix", metavar="matrix.mtx", type=str, help="Path to matrix.mtx file"
+    )
+    return parser_extract
+
+
+def validate_mx_extract_args(parser, args):
+    run_mx_extract(
+        args.matrix,
+        args.genes_in,
+        args.targets,
+        args.genes_out,
+        args.output,
+    )
+
+
+def run_mx_extract(matrix_fn, genes_in_fn, targets_fn, genes_out_fn, output_fn):
+
+    # read in
     targets = []
     read_str_list(targets_fn, targets)
-
     genes = []
     read_str_list(genes_in_fn, genes)
-
     mtx = mmread(matrix_fn).tocsr()
 
+    # execute
+    sel_mtx, sel_genes = mx_extract(mtx, genes, targets)
+
+    # write out
+    mmwrite(output_fn, sel_mtx)
+    write_list(genes_out_fn, sel_genes)
+
+
+def mx_extract(mtx, genes, targets):
     # given markers.txt, extract the matrix (in the order of the genes there)
     select_reorder = [genes.index(i) for i in targets]
     sr_genes = [genes[i] for i in select_reorder]
@@ -26,6 +90,5 @@ def mx_extract(matrix_fn, genes_in_fn, targets_fn, genes_out_fn, output_fn):
     assert True == (sr_genes == targets)
 
     sel_mtx = mtx[:, select_reorder].copy()
-    mmwrite(output_fn, sel_mtx)
     sel_genes = np.array(genes)[select_reorder]
-    write_list(genes_out_fn, sel_genes.tolist())
+    return (sel_mtx, sel_genes.tolist())

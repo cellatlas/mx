@@ -7,6 +7,55 @@ from scipy.sparse import csr_matrix
 from .utils import nd, read_str_list, write_list
 
 
+def setup_mx_filter_args(parser):
+    filter_info = "Filter cells from matrix"
+    parser_filter = parser.add_parser(
+        "filter", description=filter_info, help=filter_info, add_help=True
+    )
+
+    # filter subparser arguments
+    parser_filter.add_argument(
+        "-bi",
+        "--bcs-in",
+        default=None,
+        type=str,
+        required=True,
+        help="path to input barcodes file",
+    )
+    parser_filter.add_argument(
+        "-bo",
+        "--bcs-out",
+        default=None,
+        type=str,
+        required=True,
+        help="Path to output barcodes file",
+    )
+    parser_filter.add_argument(
+        "-o",
+        "--output",
+        default=None,
+        type=str,
+        required=True,
+        help="Path to output matrix",
+    )
+    parser_filter.add_argument(
+        "matrix", metavar="matrix.mtx", type=str, help="Path to matrix.mtx file"
+    )
+    return parser_filter
+
+
+def validate_mx_filter_args(parser, args):
+    run_mx_filter(
+        args.matrix,
+        args.bcs_in,
+        args.output,
+        args.bcs_out,
+        sum_axis=1,
+        comps=[2],
+        select_axis=None,  # if you want to do the knee only on certain columns
+    )
+
+
 def knee(mtx, sum_axis):
     u = nd(mtx.sum(sum_axis))  # counts per barcode
     x = np.sort(u)[::-1]  # sorted
@@ -52,11 +101,11 @@ def gmm(x, v, comps):
     return gmm(x[x > cutoff], v[x > cutoff], comps)  # , n_comps, n_iter)
 
 
-def mx_filter(
+def run_mx_filter(
     matrix_fn,
-    barcodes_fn,
+    axis_data_fn,
     matrix_fn_out,
-    barcodes_fn_out,
+    axis_data_out_fn,
     sum_axis=1,
     comps=[2],
     select_axis=None,  # if you want to do the knee only on certain columns
@@ -65,9 +114,19 @@ def mx_filter(
     mtx = mmread(matrix_fn).toarray()
 
     # read barcodes
-    barcodes = []
-    read_str_list(barcodes_fn, barcodes)
+    axis_data = []
+    read_str_list(axis_data_fn, axis_data)
 
+    (mtx_f, axis_data_f) = mx_filter(mtx, axis_data, sum_axis, comps, select_axis)
+
+    # save filtered matrix
+    mmwrite(matrix_fn_out, csr_matrix(mtx_f))
+
+    # save filtered metadata
+    write_list(axis_data_out_fn, axis_data_f)
+
+
+def mx_filter(mtx, axis_data, sum_axis, comps, select_axis):
     # find knee
     # check this, do it twice?
     u, x, v = knee(mtx, sum_axis)
@@ -81,10 +140,5 @@ def mx_filter(
     # mask matrix and netadata
     mask = u > cutoff
     mtx_f = mtx[mask]
-    barcodes_f = np.array(barcodes)[mask]
-
-    # save filtered matrix
-    mmwrite(matrix_fn_out, csr_matrix(mtx_f))
-
-    # save filtered metadata
-    write_list(barcodes_fn_out, barcodes_f)
+    axis_data_f = np.array(axis_data)[mask]
+    return (mtx_f, axis_data_f)
