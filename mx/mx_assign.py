@@ -1438,6 +1438,74 @@ class ImprovedGaussianMixture(BaseMixture):
         return -2 * self.score(X) * X.shape[0] + 2 * self._n_parameters()
 
 
+def setup_mx_assign_args(parser):
+    assign_info = "Run assignment algorithm"
+    parser_assign = parser.add_parser(
+        "assign", description=assign_info, help=assign_info, add_help=True
+    )
+
+    # assign subparser arguments
+    parser_assign.add_argument(
+        "-g",
+        "--groups",
+        default=None,
+        type=str,
+        required=True,
+        help="Input path for genes.txt",
+    )
+    # assign subparser arguments
+    parser_assign.add_argument(
+        "-gi",
+        "--genes-in",
+        default=None,
+        type=str,
+        required=True,
+        help="Input path for genes.txt",
+    )
+    # assign subparser arguments
+    parser_assign.add_argument(
+        "-bi",
+        "--bcs-in",
+        default=None,
+        type=str,
+        required=True,
+        help="Input path for bcs.txt",
+    )
+    parser_assign.add_argument(
+        "-e",
+        "--ec",
+        default=None,
+        type=str,
+        required=True,
+        help="Output path for bcs.txt",
+    )
+
+    parser_assign.add_argument(
+        "-o",
+        "--output",
+        default=None,
+        type=str,
+        required=True,
+        help="Output path to save matrix",
+    )
+
+    parser_assign.add_argument(
+        "matrix", metavar="matrix.mtx", type=str, help="Path to matrix.mtx file"
+    )
+    return parser_assign
+
+
+def validate_mx_assign_args(parser, args):
+    run_mx_assign(
+        args.matrix,
+        args.bcs_in,
+        args.genes_in,
+        args.ec,
+        args.groups,
+        args.output,
+    )
+
+
 def get_marker_centroids(X, markers_ec, method="mean"):
     n_clusters = len(list(markers_ec.keys()))
     _, n_features = X.shape
@@ -1522,22 +1590,29 @@ def mx_assign(G, barcodes, genes, groups, markers_ec):
     ent = entropy(prob, axis=1)
 
     # make df
-    df = pd.DataFrame(G, columns=[f"{i}" for i in genes])
+    gcols = [f"{i}" for i in genes]
+    df = pd.DataFrame(G, columns=gcols)
 
     df["label_id"] = labels
     df["label"] = df["label_id"].map({i: groups[i] for i in range(len(groups))})
     df["ent"] = ent
-    df.index = barcodes
 
+    mcols = [f"mahalanobis_{idx}" for idx in np.arange(prob.T.shape[0])]
     for idx, p in enumerate(prob.T):
         df[f"mahalanobis_{idx}"] = p
+
+    reorder_cols = ["label_id", "label", "ent"] + gcols + mcols
+    df = df[reorder_cols]
+    df.index = barcodes
+    df.index.name = "barcodes"
+
     return (df, means)
 
 
 from collections import defaultdict
 
 
-def mx_assign_fn(
+def run_mx_assign(
     matrix_fn, barcodes_fn, genes_fn, markers_ec_fn, groups_fn, assignments_out_fn
 ):
     # mx assign assumes matrix has been filtered and that genes are ordered by their numbering in matrix_ec
