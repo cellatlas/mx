@@ -45,7 +45,22 @@ def setup_mx_clean_args(parser):
         required=True,
         help="Output path for bcs.txt",
     )
-
+    parser_clean.add_argument(
+        "-mi",
+        "--markers-in",
+        default=None,
+        type=str,
+        required=True,
+        help="Input path for markers.txt",
+    )
+    parser_clean.add_argument(
+        "-mo",
+        "--markers-out",
+        default=None,
+        type=str,
+        required=True,
+        help="Output path for markers.txt",
+    )    
     parser_clean.add_argument(
         "-o",
         "--output",
@@ -66,9 +81,11 @@ def validate_mx_clean_args(parser, args):
         args.matrix,
         args.genes_in,
         args.bcs_in,
+        args.markers_in,
         args.output,
         args.genes_out,
         args.bcs_out,
+        args.markers_out
     )
 
 def run_mx_clean(
@@ -80,7 +97,7 @@ def run_mx_clean(
     barcodes = []
     read_str_list(barcodes_fn, barcodes)
     markers = defaultdict(list)
-    read_markers_str(markers_fname, markers)
+    read_markers_str(markers_fn, markers)
     
     mtx_f, bcs_f, genes_f, markers_f = mx_clean(mtx, barcodes, genes, markers)
 
