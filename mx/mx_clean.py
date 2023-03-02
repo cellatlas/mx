@@ -1,4 +1,4 @@
-from .utils import read_str_list, write_list
+from .utils import read_str_list, write_list, read_markers, write_markers
 from scipy.io import mmread, mmwrite
 import numpy as np
 
@@ -71,36 +71,46 @@ def validate_mx_clean_args(parser, args):
         args.bcs_out,
     )
 
-
 def run_mx_clean(
-    matrix_fn, genes_fn, barcodes_fn, matrix_out_fn, genes_out_fn, barcodes_out_fn
+    matrix_fn, genes_fn, barcodes_fn, markers_fn, matrix_out_fn, genes_out_fn, barcodes_out_fn, markers_out_fn
 ):
     mtx = mmread(matrix_fn).tocsr()
     genes = []
     read_str_list(genes_fn, genes)
     barcodes = []
     read_str_list(barcodes_fn, barcodes)
-
-    mtx_f, bcs_f, genes_f = mx_clean(mtx, barcodes, genes)
+    markers = defaultdict(list)
+    read_markers_str(markers_fname, markers)
+    
+    mtx_f, bcs_f, genes_f, markers_f = mx_clean(mtx, barcodes, genes, markers)
 
     mmwrite(matrix_out_fn, mtx_f)
     write_list(genes_out_fn, genes_f)
     write_list(barcodes_out_fn, bcs_f)
+    write_markers(markers_out_fn, markers_f)
 
 
-def mx_clean(mtx, bcs, genes):
+def mx_clean(mtx, bcs, genes, markers):
     ## mx clean
     # subsetting the matrix means that some cells/genes will now have zero counts -> drop em!
 
     # check if any cells are zero
     nonzero_cells = np.where(mtx.sum(1).A.ravel() != 0)[0]
+    nonzero_genes = np.where(mtx.sum(0).A.ravel() != 0)[0]
     print(f"Dropping {mtx.shape[0] - len(nonzero_cells)} cells")
-    mtx_f = mtx[nonzero_cells].copy()
-    genes_f = genes  # np.array(genes)[nonzero_genes].tolist() # TODO handle no genes
-    bcs_f = np.array(bcs)[nonzero_cells].tolist()
+    print(f"Dropping {mtx.shape[1] - len(nonzero_genes)} genes")
 
-    # check if any genes are zero NB: if genes end up getting dropped, will have to handle that in the EC files
-    # nonzero_genes = np.where(mtx.sum(0).A.ravel() != 0)[0]
-    # print(f"Dropping {mtx.shape[1] - len(nonzero_genes)} genes")
-    # mtx = mtx[:, nonzero_genes].copy()
-    return (mtx_f, bcs_f, genes_f)
+    mtx_f = mtx[nonzero_cells].copy()
+    mtx_ff = mtx_f[:,nonzero_genes].copy()
+
+    # Filter barcodes and genes
+    bcs_f = np.array(bcs)[nonzero_cells].tolist()
+    genes_f = np.array(genes)[nonzero_genes].tolist()
+
+    # Filter markers.txt file
+    markers_f = defaultdict(list)
+    for ct in list(markers.keys()):
+      ct_gf = [g for g in markers[ct] if g in genes_f]
+      markers_f[ct] =  ct_gf
+    
+    return (mtx_ff, bcs_f, genes_f, markers_f)
