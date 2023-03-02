@@ -298,6 +298,16 @@ class BaseMixture(DensityMixin, BaseEstimator, metaclass=ABCMeta):
         # fit_predict(X) are always consistent with fit(X).predict(X)
         # for any value of max_iter and tol (and any random_state).
         _, log_resp = self._e_step(X)
+        # assn = log_resp.argmax
+        # weights = log_resp
+        # ent = entropy(weights, axis=1)
+        # max_ent = np.log2(weights.shape[1])
+        # pent = ent / max_ent
+        # badmask = pent > 0.8  # entropy is
+        # assn = np.zeros_like(pent).astype(int)
+        # assn[badmask] = weights.shape[1] - 1  # last cell type (other)
+        # assn[~badmask] = weights[~badmask].argmax(axis=1)  # assign the good dudes
+        # return assn
 
         return log_resp.argmax(axis=1)
 
@@ -396,6 +406,20 @@ class BaseMixture(DensityMixin, BaseEstimator, metaclass=ABCMeta):
         """
         check_is_fitted(self)
         X = self._validate_data(X, reset=False)
+        # get entropy
+        # remove cells with low ent
+        # # return argmax
+        # from scipy.stats import entropy
+
+        # weights = self._estimate_weighted_log_prob(X)
+        # ent = entropy(weights, axis=1)
+        # max_ent = np.log2(weights.shape[1])
+        # pent = ent / max_ent
+        # badmask = pent > 0.1  # entropy is
+        # assn = np.zeros_like(pent).astype(int)
+        # assn[badmask] = weights.shape[1] - 1  # last cell type (other)
+        # assn[~badmask] = weights[~badmask].argmax(axis=1)  # assign the good dudes
+        # return assn
         return self._estimate_weighted_log_prob(X).argmax(axis=1)
 
     def predict_proba(self, X):
@@ -753,6 +777,7 @@ def _estimate_gaussian_covariances_full(resp, X, nk, means, reg_covar):
     """
     n_components, n_features = means.shape
     covariances = np.empty((n_components, n_features, n_features))
+    # print("ncomps: ", n_components, "resp: ", resp.shape)
     for k in range(n_components):
         diff = X - means[k]
         covariances[k] = np.dot(resp[:, k] * diff.T, diff) / nk[k]
@@ -867,8 +892,40 @@ def _estimate_gaussian_parameters(X, resp, reg_covar, covariance_type, B=None):
         The shape depends of the covariance_type.
     """
     # print("Doing the thing..")
-    nk = resp.sum(axis=0) + 10 * np.finfo(resp.dtype).eps
-    means = np.dot(resp.T, X) / nk[:, np.newaxis]
+
+    # assn = np.zeros_like(pent).astype(int)
+    # assn[badmask] = weights.shape[1] - 1  # last cell type (other)
+    # assn[~badmask] = weights[~badmask].argmax(axis=1)  # assign the good dudes
+
+    weights = resp
+    ent = entropy(weights, axis=1)
+    max_ent = np.log2(weights.shape[1])
+    pent = ent / max_ent
+    badmask = pent > 0.9  # entropy is
+    if badmask.sum() > 0:
+        # cells by samples
+        good_resp = resp[~badmask][:, :-1]
+
+        # samples
+        goodnk = good_resp.sum(axis=0) + 10 * np.finfo(good_resp.dtype).eps
+        # samples
+        good_means = (
+            # samples by cells dot cells by snps
+            np.dot(good_resp.T, X[~badmask])
+            / goodnk[:, np.newaxis]
+        )
+
+        bad_resp = resp[badmask][:, -1]
+        badnk = bad_resp.sum(axis=0) + 10 * np.finfo(bad_resp.dtype).eps
+        bad_means = (
+            np.dot(np.array([bad_resp]), X[badmask]) / np.array([badnk])[:, np.newaxis]
+        )
+
+        means = np.vstack([good_means, bad_means])
+        nk = resp[~badmask].sum(axis=0) + 10 * np.finfo(resp.dtype).eps
+    else:
+        nk = resp.sum(axis=0) + 10 * np.finfo(resp.dtype).eps
+        means = np.dot(resp.T, X) / nk[:, np.newaxis]
 
     # frankie
     # get the mins for the marker genes
@@ -879,16 +936,23 @@ def _estimate_gaussian_parameters(X, resp, reg_covar, covariance_type, B=None):
     # modify based on the min/f
     f = 2.0
     for idx, i in enumerate(means):
-        # ct_min = ct_mins[idx]
-        betas = means[idx]
-        for jdx, b in enumerate(betas):
-            if jdx not in marker_gene_indices[idx]:
-                new = 0  # min(b, ct_min / f)
-                means[idx][jdx] = new
-#             else:
-#                 if means[idx][jdx] == 0:
-#                     means[idx][jdx] = 1e-8
-
+        if idx != means.shape[-1] - 1:
+            # ct_min = ct_mins[idx]
+            betas = means[idx]
+            for jdx, b in enumerate(betas):
+                if jdx not in marker_gene_indices[idx]:
+                    new = 0  # min(b, ct_min / f)
+                    means[idx][jdx] = new
+    # print(
+    #     "resp.shape: ",
+    #     resp.shape,
+    #     "X.shape: ",
+    #     X.shape,
+    #     "nk.shape: ",
+    #     nk.shape,
+    #     "means.shape: ",
+    #     means.shape,
+    # )
     covariances = {
         "full": _estimate_gaussian_covariances_full,
         "tied": _estimate_gaussian_covariances_tied,
