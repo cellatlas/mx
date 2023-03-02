@@ -58,7 +58,7 @@ def setup_mx_clean_args(parser):
     parser_clean.add_argument(
         "matrix", metavar="matrix.mtx", type=str, help="Path to matrix.mtx file"
     )
-
+    return parser_clean
 
 def validate_mx_clean_args(parser, args):
 
