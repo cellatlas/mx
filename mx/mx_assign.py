@@ -901,7 +901,7 @@ def _estimate_gaussian_parameters(X, resp, reg_covar, covariance_type, B=None):
     ent = entropy(weights, axis=1)
     max_ent = np.log2(weights.shape[1])
     pent = ent / max_ent
-    badmask = pent > 0.9  # entropy is
+    badmask = pent > 0.8  # entropy is
     if badmask.sum() > 0:
         # cells by samples
         good_resp = resp[~badmask][:, :-1]
