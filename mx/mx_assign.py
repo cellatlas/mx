@@ -1627,10 +1627,10 @@ def mx_assign(G, barcodes, genes, groups, markers_ec):
         "weights_init": None,  # to be added
         "precisions_init": None,  # to be added
         "random_state": 0,
-        "reg_covar": 1e-8,
+        "reg_covar": 1e-5,
         "verbose": 2,
         "n_init": 1,
-        "max_iter": 1000,
+        "max_iter": 200,
         "tol": 1e-8,
         "init_params": "random",
         "covariance_type": "full",
