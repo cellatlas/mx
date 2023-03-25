@@ -131,7 +131,7 @@ def mx_inspect_rows(mtx, md):
     counts_sum = nd(np.sum(mtx, axis=1))
     counts_mean = nd(np.mean(mtx, axis=1))
     # counts_median = nd(np.median(mtx, axis=1))
-    counts_nnzero = nd(np.sum(mtx == 0, axis=1))
+    counts_nnzero = mtx.getnnz(1)  # nd(np.sum(mtx == 0, axis=1))
     mtx_mean = mtx.mean(1)
     mtx.data **= 2
     counts_variance = nd(mtx.mean(1)) - nd(mtx_mean) ** 2
@@ -166,7 +166,7 @@ def mx_inspect_cols(mtx, md):
     counts_sum = nd(np.sum(mtx, axis=0))
     counts_mean = nd(np.mean(mtx, axis=0))
     # counts_median = nd(np.median(mtx, axis=0))
-    counts_nnzero = nd(np.sum(mtx == 0, axis=0))
+    counts_nnzero = mtx.getnnz(0)  # nd(np.sum(mtx == 0, axis=0))
     mtx_mean = mtx.mean(0)
     mtx.data **= 2
     counts_variance = nd(mtx.mean(0)) - nd(mtx_mean) ** 2
