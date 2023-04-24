@@ -1,4 +1,5 @@
-from scipy.stats import ttest_ind, rankdata
+from scipy.stats import ttest_ind, rankdata, ttest_ind_from_stats
+from scipy.sparse import csr_matrix
 import numpy as np
 import pandas as pd
 import logging
@@ -109,7 +110,16 @@ def correct_pvals(pvals):
     return r
 
 
-def dexpress(mat, components, features, assignments, **kwargs):
+def sparse_mean_var(mtx):
+    mtx_squared = mtx.copy()
+    mtx_squared.data **= 2
+    gvar = (mtx_squared.mean(0) - np.square(mtx.mean(0))).A.ravel()
+    gmean = mtx.mean(axis=0).A.ravel()
+    nobs = mtx.shape[0]
+    return (gmean, gvar, nobs)
+
+
+def dexpress(mat: csr_matrix, components, features, assignments, **kwargs):
     """
     mat: ndarray
     components: nparray
@@ -152,15 +162,22 @@ def dexpress(mat, components, features, assignments, **kwargs):
         statistic = np.nan
         effect_size = np.nan
 
-        means = t_mat.mean(0).ravel()
+        means = nd(t_mat.mean(0))
         ranks = means.shape[0] - rankdata(means)  # also make rankdata as frac
 
-        test = ttest_ind(t_mat, c_mat, nan_policy="propagate", equal_var=False)
-        ct_nnz = (t_mat > 0).sum(0).ravel()
+        means1, var1, n1 = sparse_mean_var(t_mat)
+        means2, var2, n2 = sparse_mean_var(c_mat)
+
+        test = ttest_ind_from_stats(
+            means1, np.sqrt(var1), n1, means2, np.sqrt(var2), n2, equal_var=False
+        )
+
+        # test = ttest_ind(t_mat, c_mat, nan_policy="propagate", equal_var=False)
+        ct_nnz = nd((t_mat > 0).sum(0))
         ct_nnz_frac = ct_nnz / t_mat.shape[0]
         pvalue = test.pvalue
         statistic = test.statistic
-        effect_size = nd(t_mat.mean(axis=0)) - nd(c_mat.mean(axis=0))
+        effect_size = means1 - means2  # nd(t_mat.mean(axis=0)) - nd(c_mat.mean(axis=0))
         nfeatures[tidx] = t_mat.shape[1]
 
         pval[tidx, :] = pvalue
@@ -223,7 +240,7 @@ def make_table(assignments, features, p_raw, p_corr, es, nnz, nnz_frac, rank, me
 
 
 def run_mx_diff(matrix_fn, bcs_fn, genes_fn, assignments_fn, degs_fn):
-    mtx = mmread(matrix_fn).A
+    mtx = mmread(matrix_fn).tocsr()
     barcodes = []
     read_str_list(bcs_fn, barcodes)
     barcodes = np.array(barcodes)
