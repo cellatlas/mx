@@ -11,6 +11,7 @@ from .mx_filter import setup_mx_filter_args, validate_mx_filter_args
 from .mx_inspect import setup_mx_inspect_args, validate_mx_inspect_args
 from .mx_normalize import setup_mx_normalize_args, validate_mx_normalize_args
 from .mx_split import setup_mx_split_args, validate_mx_split_args
+from .mx_convert import setup_mx_convert_args, validate_mx_convert_args
 
 
 def main():
@@ -30,6 +31,7 @@ def main():
     command_to_parser = {
         "assign": setup_mx_assign_args(subparsers),
         "clean": setup_mx_clean_args(subparsers),
+        "convert": setup_mx_convert_args(subparsers),
         "diff": setup_mx_diff_args(subparsers),
         "extract": setup_mx_extract_args(subparsers),
         "filter": setup_mx_filter_args(subparsers),
@@ -61,6 +63,7 @@ def main():
     COMMAND_TO_FUNCTION = {
         "assign": validate_mx_assign_args,
         "clean": validate_mx_clean_args,
+        "convert": validate_mx_convert_args,
         "diff": validate_mx_diff_args,
         "extract": validate_mx_extract_args,
         "filter": validate_mx_filter_args,
