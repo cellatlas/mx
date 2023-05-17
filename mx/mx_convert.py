@@ -1,4 +1,7 @@
 from kb_python.utils import import_matrix_as_anndata
+import anndata
+from scipy.io import mmread
+import pandas as pd
 
 
 def setup_mx_convert_args(parser):
@@ -58,7 +61,34 @@ def run_mx_convert(matrix_fn, barcodes_fn, genes_fn, output_fn, filetype):
     # barcodes = read_str_list(barcodes_fn)
     # genes = read_str_list(genes_fn)
 
-    out = import_matrix_as_anndata(matrix_fn, barcodes_fn, genes_fn)
+    # import scipy sparse matrix
+    mtx = mmread(matrix_fn).tocsr()
+
+    # check if the barcodes have metadata
+    with open(barcodes_fn, "r") as f:
+        line = f.readline().strip().split("\t")
+    if len(line) > 1:
+        # import barcodes (and metadata)
+        barcodes = pd.read_csv(barcodes_fn, index_col=0, sep="\t")
+    else:
+        barcodes = pd.read_csv(
+            barcodes_fn, header=None, names=["barcodes"], index_col=0, sep="\t"
+        )
+
+    # check if the genes have metadata
+    with open(genes_fn, "r") as f:
+        line = f.readline().strip().split("\t")
+    if len(line) > 1:
+        # import barcodes (and metadata)
+        genes = pd.read_csv(genes_fn, index_col=0, sep="\t")
+    else:
+        genes = pd.read_csv(
+            genes_fn, header=None, names=["gene_ids"], index_col=0, sep="\t"
+        )
+
+    # convert to anndata
+    out = anndata.AnnData(X=mtx, obs=barcodes, var=genes)
+
     out.write_h5ad(output_fn)
 
 
