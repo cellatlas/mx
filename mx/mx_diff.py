@@ -248,11 +248,12 @@ def run_mx_diff(matrix_fn, bcs_fn, genes_fn, assignments_fn, degs_fn):
     genes = []
     read_str_list(genes_fn, genes)
     genes = np.array(genes)
-    assignments = pd.read_csv(assignments_fn, sep="\t", index_col=0)["label"].values
+    df = pd.read_csv(assignments_fn, sep="\t", index_col=0)
+    assignments = df["label"].values
 
     # filter matrix for barcodes in the assignments
     noldbcs = mtx.shape[0]
-    mtx = mtx[pd.Series(barcodes).isin(assignments)].copy()
+    mtx = mtx[pd.Series(barcodes).isin(df.index.values)].copy()
     barcodes = barcodes[pd.Series(barcodes).isin(assignments)].copy()
     print(f"{noldbcs - mtx.shape[0]}: barcodes removed from matrix")
 
