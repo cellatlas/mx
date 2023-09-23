@@ -32,7 +32,7 @@ def setup_mx_inspect_args(parser):
         help="Input path for genes.txt",
     )
     parser_format.add_argument(
-        "-a", "--axis", required=False, default=None, choices=["rows", "cols"]
+        "-a", "--axis", required=True, default=None, choices=["rows", "cols", "all"]
     )
 
     parser_format.add_argument(
