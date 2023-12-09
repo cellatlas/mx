@@ -99,6 +99,11 @@ def mx_inspect(mtx):
     n = mtx.shape[0] * mtx.shape[1]
     sp = nvals / n
     overdispersion = compute_overdispersion(mtx)
+    # compute single-cell index, scindex
+    sindex = 0
+    for i in np.sort(mtx.sum(1).A.ravel())[::-1]:
+        if i >= sindex:
+            sindex += 1
 
     entry = {
         "ncells": ncells,
@@ -111,6 +116,7 @@ def mx_inspect(mtx):
         "max_cell": mxc,
         "total_count": cellsum,
         "overdispersion": overdispersion,
+        "s_index": sindex,
     }
     return entry
 
