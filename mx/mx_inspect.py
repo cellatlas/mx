@@ -92,6 +92,10 @@ def mx_inspect(mtx):
     ncells, ngenes = mtx.shape
     apc = mtx.sum(1).mean()
     apg = mtx.sum(0).mean()
+
+    apc_nnz = (mtx > 0).sum(1).mean()
+    apg_nnz = (mtx > 0).sum(0).mean()
+
     mnc = int(mtx.sum(1).min())
     mxc = int(mtx.sum(1).max())
     cellsum = int(mtx.sum())
@@ -110,11 +114,13 @@ def mx_inspect(mtx):
         "ngenes": ngenes,
         "nvals": nvals,
         "density": sp,
-        "avg_per_cell": apc,
-        "avg_per_gene": apg,
+        "avg_counts_per_cell": apc,
+        "avg_counts_per_gene": apg,
+        "avg_nnzero_per_cell": apc_nnz,
+        "avg_nnzero_per_gene": apg_nnz,
         "min_cell": mnc,
         "max_cell": mxc,
-        "total_count": cellsum,
+        "total_counts": cellsum,
         "overdispersion": overdispersion,
         "s_index": sindex,
     }
