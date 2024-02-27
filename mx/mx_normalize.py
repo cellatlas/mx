@@ -1,7 +1,8 @@
 from scipy.io import mmread, mmwrite
 from scipy import sparse
 import numpy as np
-
+from scipy.stats import rankdata
+from scipy.sparse import csr_matrix
 
 def setup_mx_normalize_args(parser):
     normalize_info = "Normalize matrix with PFlog1pPF"
@@ -24,7 +25,7 @@ def setup_mx_normalize_args(parser):
     )
 
     parser_normalize.add_argument(
-        "-m", "--method", required=False, default="log1pPF", choices=["PF", "log1pPF"]
+        "-m", "--method", required=False, default="log1pPF", choices=["PF", "log1pPF", "rank"]
     )
 
     return parser_normalize
@@ -52,6 +53,8 @@ def mx_normalize(mtx, method="log1pPF"):
     elif method == "PF":
         pre_pf = mtx.sum(axis=1).A.ravel()
         m = sparse.diags(pre_pf.mean() / pre_pf) @ mtx
+    elif method == "rank":
+        m = csr_matrix((rankdata(mtx.A, axis=0, method="min"))-1)
     else:
         raise NotImplementedError()
 
