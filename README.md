@@ -9,6 +9,7 @@ $ g++ -std=c++11 ../src/**/*.cpp -o mx && cp mx /usr/local/bin
 ```
 
 To install python `mx` run the following commands:
+
 ```
 $ pip install git+https://github.com/sbooeshaghi/mx/
 ```
