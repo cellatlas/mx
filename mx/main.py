@@ -12,6 +12,7 @@ from .mx_inspect import setup_mx_inspect_args, validate_mx_inspect_args
 from .mx_normalize import setup_mx_normalize_args, validate_mx_normalize_args
 from .mx_split import setup_mx_split_args, validate_mx_split_args
 from .mx_convert import setup_mx_convert_args, validate_mx_convert_args
+from .mx_plot import setup_mx_plot_args, validate_mx_plot_args
 
 
 def main():
@@ -37,6 +38,7 @@ def main():
         "filter": setup_mx_filter_args(subparsers),
         "inspect": setup_mx_inspect_args(subparsers),
         "normalize": setup_mx_normalize_args(subparsers),
+        "plot": setup_mx_plot_args(subparsers),
         "split": setup_mx_split_args(subparsers),
     }
 
@@ -69,6 +71,7 @@ def main():
         "filter": validate_mx_filter_args,
         "inspect": validate_mx_inspect_args,
         "normalize": validate_mx_normalize_args,
+        "plot": validate_mx_plot_args,
         "split": validate_mx_split_args,
     }
     COMMAND_TO_FUNCTION[sys.argv[1]](parser, args)

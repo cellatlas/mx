@@ -44,6 +44,10 @@ def setup_mx_plot_args(parser):
     )
 
     parser_format.add_argument(
+        "-m", "--method", required=False, default="knee", choices=["knee"]
+    )
+
+    parser_format.add_argument(
         "matrix", metavar="matrix.mtx", type=str, help="Path to matrix.mtx file"
     )
     return parser_format
@@ -52,19 +56,23 @@ def setup_mx_plot_args(parser):
 def validate_mx_plot_args(parser, args):
     mtx_fn = args.matrix
     plot_fn = args.output
-    axis = args.axis
     barcodes_fn = args.bcs_in
     genes_fn = args.genes_in
+    method = args.method
 
 
-    run_mx_plot(mtx_fn, plot_fn)
+    run_mx_plot(mtx_fn, plot_fn, method, barcodes_fn, genes_fn)
 
 
-def run_mx_plot(mtx_fn, plot_fn):
-    mtx = mmread(mtx_fn)
+def run_mx_plot(mtx_fn, plot_fn, method, barcodes_fn, genes_fn):
+    mtx = mmread(mtx_fn).tocsr()
     fig, ax = plt.subplots(figsize=(10,10))
-    ax = mx_plot(mtx, ax)
-    fig.savefig(plot_fn)
+    if method == "knee":
+
+        ax = mx_plot_knee(mtx, ax)
+    else:
+        raise NotImplementedError()
+    fig.savefig(plot_fn, dpi=300)
 
 
 def yex(ax):
@@ -78,11 +86,11 @@ def yex(ax):
     ax.set(**{"aspect": "equal", "xlim": lims, "ylim": lims})
     return ax
 
-def mx_plot(mtx, ax):
-    s = np.array(mtx.sum(axis=1)).flatten()
+def mx_plot_knee(mtx, ax):
+    fsize = 20
+    plt.rcParams.update({"font.size": fsize})
+    x = np.sort(np.array(mtx.sum(axis=1)).flatten())[::-1]
 
-    
-    x = s.sort()
     y = np.arange(x.shape[0])
     ax.scatter(x,y)
     ax.set(**{
