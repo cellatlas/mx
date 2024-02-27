@@ -60,28 +60,22 @@ then
     usage
 fi
 
-echo "Out:" $OUTPUT
+echo "OUT:" $OUTPUT
 echo "MTX:" $MATRIX
 echo "BCS:" $BARCODES
 echo "GEN:" $GENES
 echo "MAR:" $MARKERS
 
-# make the markers file
-# ../../../../code/binMarkers2ecMarkers.py ../ca/marker_matrix.csv markers.txt
-
 
 # ec index (first time)
-ec index -g $OUTPUT/groups.txt -t $OUTPUT/targets.txt -e $OUTPUT/ec.txt $MARKERS
+echo "ec index"
+time ec index -g $OUTPUT/groups.txt -t $OUTPUT/targets.txt -e $OUTPUT/ec.txt $MARKERS
 
 # mx filter
-# echo “mx filter”
-# time mx filter -bi $BARCODES -bo $OUTPUT/filter_barcodes.txt -o $OUTPUT/filter.mtx $MATRIX
+echo “mx filter”
+time mx filter -bi $BARCODES -bo $OUTPUT/filter_barcodes.txt -o $OUTPUT/filter.mtx $MATRIX
 
-# normally filtering would go here copy the barcodes and matrix
-cp $MATRIX $OUTPUT/filter.mtx
-cp $BARCODES $OUTPUT/filter_barcodes.txt
-
-# mx normalize
+# mx normalize -m log1pPF
 echo “mx normalize”
 time mx normalize -o $OUTPUT/norm.mtx $OUTPUT/filter.mtx
 
@@ -105,26 +99,21 @@ time ec index -g $OUTPUT/clean.groups.txt -t $OUTPUT/clean.targets.txt -e $OUTPU
 echo “mx extract”
 time mx extract -t $OUTPUT/clean.targets.txt -gi $OUTPUT/clean_genes.txt  -go $OUTPUT/extract.clean_genes.txt -o $OUTPUT/extract.clean.mtx $OUTPUT/clean.mtx
 
+# rank normalization step
+echo "mx norm -m rank"
+time mx norm -m rank -o $OUTPUT/rank.mtx $OUTPUT/extract.clean.mtx
 
-# mx assign
+# assignment on rank matrix
 echo “mx assign”
-time mx assign -g $OUTPUT/clean.groups.txt -gi $OUTPUT/extract.clean_genes.txt -bi $OUTPUT/clean_barcodes.txt -e $OUTPUT/clean.markers.ec -o $OUTPUT/assignments.txt $OUTPUT/extract.clean.mtx
-
-echo “rank”
-mkdir $OUTPUT/rank
-python /home/cellatlas/human/scripts/rankmtx.py $OUTPUT/extract.clean.mtx $OUTPUT/rank.mtx
-
-echo “mx assign on rank matrix”
-time mx assign -g $OUTPUT/clean.groups.txt -gi $OUTPUT/extract.clean_genes.txt -bi $OUTPUT/clean_barcodes.txt -e $OUTPUT/clean.markers.ec -o $OUTPUT/rank/assignments.txt $OUTPUT/rank.mtx
-
+time mx assign -g $OUTPUT/clean.groups.txt -gi $OUTPUT/extract.clean_genes.txt -bi $OUTPUT/clean_barcodes.txt -e $OUTPUT/clean.markers.ec -o $OUTPUT/assignments.txt $OUTPUT/rank.mtx
 
 # # mx diff
-#echo "mx diff"
+# echo "mx diff"
 # time mx diff -a $OUTPUT/assignments.txt -gi $GENES -b $OUTPUT/filter_barcodes.txt -o $OUTPUT/degs.txt $OUTPUT/norm.mtx
 # 
 # # ec mark
 # echo "ec mark"
-# time ec mark -p 0.05 -f 0.02 -g 5 -o $OUTPUT/markers_updated.txt $OUTPUT/degs.txt
+# time ec mark -p 0.05 -f 0.02 -g 5 -m 10 -o $OUTPUT/markers_updated.txt $OUTPUT/degs.txt
 # 
 # # ec merge
 # echo "ec marge"
