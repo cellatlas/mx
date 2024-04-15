@@ -4,6 +4,12 @@
 
 ## Installation
 
+The development version can be installed with
+
+```bash
+pip install git+https://github.com/sbooeshaghi/mx
+```
+
 ## Usage
 
 `mx` consists of 10 subcommands:
