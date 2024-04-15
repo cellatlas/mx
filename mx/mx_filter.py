@@ -38,6 +38,16 @@ def setup_mx_filter_args(parser):
         required=True,
         help="Path to output matrix",
     )
+
+    parser_filter.add_argument(
+        "-c",
+        "--comps",
+        default=[2],
+        type=int,
+        nargs="+",
+        help="Number of components for GMM",
+    )
+
     parser_filter.add_argument(
         "matrix", metavar="matrix.mtx", type=str, help="Path to matrix.mtx file"
     )
@@ -51,7 +61,7 @@ def validate_mx_filter_args(parser, args):
         args.output,
         args.bcs_out,
         sum_axis=1,
-        comps=[2],
+        comps=args.comps,
         select_axis=None,  # if you want to do the knee only on certain columns
     )
 
