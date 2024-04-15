@@ -780,6 +780,7 @@ def _estimate_gaussian_covariances_full(resp, X, nk, means, reg_covar):
     # print("ncomps: ", n_components, "resp: ", resp.shape)
     for k in range(n_components):
         diff = X - means[k]
+        diff[:,means[k] == 0] = 0 # update covariance to 0 for 0 means, noted by @harmn
         covariances[k] = np.dot(resp[:, k] * diff.T, diff) / nk[k]
         covariances[k].flat[:: n_features + 1] += reg_covar
     return covariances
@@ -927,7 +928,7 @@ def _estimate_gaussian_parameters(X, resp, reg_covar, covariance_type, B=None):
         nk = resp.sum(axis=0) + 10 * np.finfo(resp.dtype).eps
         means = np.dot(resp.T, X) / nk[:, np.newaxis]
 
-    # frankie
+    # Update non-marker values to 0
     # get the mins for the marker genes
     # ct_mins = [means[:, i].min() for i in B]
     # marker_gene_indices = [set(np.where(i)[0]) for i in B]
