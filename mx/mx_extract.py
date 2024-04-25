@@ -66,15 +66,15 @@ def run_mx_extract(matrix_fn, genes_in_fn, targets_fn, genes_out_fn, output_fn):
     targets = []
     # read_str_list(targets_fn, targets)
     if targets_fn.split(".")[-1] == "gz":
-        targets = pd.read_csv(targets_fn, header=None, compression="gzip").values.flatten()
+        targets = pd.read_csv(targets_fn, header=None, compression="gzip").values.flatten().tolist()
     else:
-        targets = pd.read_csv(targets_fn, header=None).values.flatten()
+        targets = pd.read_csv(targets_fn, header=None).values.flatten().tolist()
     genes = []
     # read_str_list(genes_in_fn, genes)
     if genes_in_fn.split(".")[-1] == "gz":
-        genes = pd.read_csv(genes_in_fn, header=None, compression="gzip").values.flatten()
+        genes = pd.read_csv(genes_in_fn, header=None, compression="gzip").values.flatten().tolist()
     else:
-        genes = pd.read_csv(genes_in_fn, header=None).values.flatten()
+        genes = pd.read_csv(genes_in_fn, header=None).values.flatten().tolist()
     mtx = mmread(matrix_fn).tocsr()
 
     # execute
