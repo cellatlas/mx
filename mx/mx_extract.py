@@ -1,7 +1,7 @@
 from scipy.io import mmread, mmwrite
 from .utils import read_str_list, write_list
 import numpy as np
-
+import pandas as pd
 
 def setup_mx_extract_args(parser):
     extract_info = "Extract submatrix of genes"
@@ -64,9 +64,17 @@ def run_mx_extract(matrix_fn, genes_in_fn, targets_fn, genes_out_fn, output_fn):
 
     # read in
     targets = []
-    read_str_list(targets_fn, targets)
+    # read_str_list(targets_fn, targets)
+    if targets_fn.split(".")[-1] == "gz":
+        targets = pd.read_csv(targets_fn, header=None, compression="gzip").values.flatten()
+    else:
+        targets = pd.read_csv(targets_fn, header=None).values.flatten()
     genes = []
-    read_str_list(genes_in_fn, genes)
+    # read_str_list(genes_in_fn, genes)
+    if genes_in_fn.split(".")[-1] == "gz":
+        genes = pd.read_csv(genes_in_fn, header=None, compression="gzip").values.flatten()
+    else:
+        genes = pd.read_csv(genes_in_fn, header=None).values.flatten()
     mtx = mmread(matrix_fn).tocsr()
 
     # execute
