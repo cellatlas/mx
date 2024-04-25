@@ -125,7 +125,12 @@ def run_mx_filter(
 
     # read barcodes
     axis_data = []
-    read_str_list(axis_data_fn, axis_data)
+    # read_str_list(axis_data_fn, axis_data)
+    if axis_data_fn.split(".")[-1] == "gz":
+        axis_data = pd.read_csv(axis_data_fn, header=None, compression="gzip").values.flatten()
+
+    else:
+        axis_data = pd.read_csv(axis_data_fn, header=None).values.flatten()
 
     (mtx_f, axis_data_f) = mx_filter(mtx, axis_data, sum_axis, comps, select_axis)
 
