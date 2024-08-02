@@ -54,7 +54,7 @@ def mx_normalize(mtx, method="log1pPF"):
         pre_pf = mtx.sum(axis=1).A.ravel()
         m = sparse.diags(pre_pf.mean() / pre_pf) @ mtx
     elif method == "rank":
-        m = csr_matrix((rankdata(mtx.A, axis=0, method="min"))-1)
+        m = csr_matrix((rankdata(mtx.toarray(), axis=0, method="min"))-1)
     else:
         raise NotImplementedError()
 
