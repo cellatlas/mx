@@ -192,7 +192,7 @@ def mx_filter_bustools(mtx, axis_data, sum_axis, comps, select_axis):
     s_sort = np.sort(s)[::-1]
 
     # Step 2: Determine threshold using the top 100 barcodes
-    M = 100  # Using top 10 barcodes to determine the threshold
+    M = 10  # Using top 10 barcodes to determine the threshold
     ERROR_RATE = 0.01  # Error rate as defined in the C++ code
     bclen = 12  # Assuming a UMI length of 12, modify according to your dataset
 
