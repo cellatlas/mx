@@ -13,6 +13,15 @@ def setup_mx_filter_args(parser):
         "filter", description=filter_info, help=filter_info, add_help=True
     )
 
+    parser_filter.add_argument(
+        "-t",
+        "--tool",
+        default="probabilistic",
+        type=str,
+        help="Tool to use for filtering",
+    )
+
+
     # filter subparser arguments
     parser_filter.add_argument(
         "-bi",
@@ -55,15 +64,24 @@ def setup_mx_filter_args(parser):
 
 
 def validate_mx_filter_args(parser, args):
-    run_mx_filter(
-        args.matrix,
-        args.bcs_in,
-        args.output,
-        args.bcs_out,
-        sum_axis=1,
-        comps=args.comps,
-        select_axis=None,  # if you want to do the knee only on certain columns
-    )
+
+    if args.tool == "bustools":
+        run_mx_filter_bustools(
+            args.matrix,
+            args.bcs_in,
+            args.output,
+            args.bcs_out,
+        )
+    else:
+        run_mx_filter(
+            args.matrix,
+            args.bcs_in,
+            args.output,
+            args.bcs_out,
+            sum_axis=1,
+            comps=args.comps,
+            select_axis=None,  # if you want to do the knee only on certain columns
+        )
 
 
 def knee(mtx, sum_axis):
@@ -121,7 +139,7 @@ def run_mx_filter(
     select_axis=None,  # if you want to do the knee only on certain columns
 ):
     # read matrix
-    mtx = mmread(matrix_fn).tocsr()
+    mtx = mmread(matrix_fn).toarray()
 
     # read barcodes
     axis_data = []
@@ -140,6 +158,54 @@ def run_mx_filter(
     # save filtered metadata
     write_list(axis_data_out_fn, axis_data_f)
 
+def run_mx_filter_bustools(
+    matrix_fn,
+    axis_data_fn,
+    matrix_fn_out,
+    axis_data_out_fn,
+    sum_axis=1,
+    comps=[2],
+    select_axis=None,  # if you want to do the knee only on certain columns
+):
+    # read matrix
+    mtx = mmread(matrix_fn).toarray()
+
+    # read barcodes
+    axis_data = []
+    # read_str_list(axis_data_fn, axis_data)
+    if axis_data_fn.split(".")[-1] == "gz":
+        axis_data = pd.read_csv(axis_data_fn, header=None, compression="gzip").values.flatten()
+
+    else:
+        axis_data = pd.read_csv(axis_data_fn, header=None).values.flatten()
+
+    (mtx_f, axis_data_f) = mx_filter_bustools(mtx, axis_data, sum_axis, comps, select_axis)
+
+    # save filtered matrix
+    mmwrite(matrix_fn_out, csr_matrix(mtx_f))
+
+    # save filtered metadata
+    write_list(axis_data_out_fn, axis_data_f)
+
+def mx_filter_bustools(mtx, axis_data, sum_axis, comps, select_axis):
+    s = mtx.sum(axis=sum_axis)
+    s_sort = np.sort(s)[::-1]
+
+    # Step 2: Determine threshold using the top 100 barcodes
+    M = 100  # Using top 10 barcodes to determine the threshold
+    ERROR_RATE = 0.01  # Error rate as defined in the C++ code
+    bclen = 12  # Assuming a UMI length of 12, modify according to your dataset
+
+    # Get the top M barcode counts
+    top_m_counts = s_sort[:M]
+    avg_count = np.mean(top_m_counts)
+
+    # Calculate the threshold based on the formula
+    threshold = avg_count * (1 - np.power(1 - ERROR_RATE, bclen))
+    mask = s > threshold
+    mtx_f = mtx[mask]
+    axis_data_f = np.array(axis_data)[mask]
+    return (mtx_f, axis_data_f)
 
 def mx_filter(mtx, axis_data, sum_axis, comps, select_axis):
     # find knee
