@@ -168,7 +168,7 @@ def run_mx_filter_bustools(
     select_axis=None,  # if you want to do the knee only on certain columns
 ):
     # read matrix
-    mtx = mmread(matrix_fn).toarray()
+    mtx = mmread(matrix_fn)
 
     # read barcodes
     axis_data = []
@@ -188,7 +188,7 @@ def run_mx_filter_bustools(
     write_list(axis_data_out_fn, axis_data_f)
 
 def mx_filter_bustools(mtx, axis_data, sum_axis, comps, select_axis):
-    s = mtx.sum(axis=sum_axis)
+    s = np.asarray(mtx.sum(axis=sum_axis)).reshape(-1)
     s_sort = np.sort(s)[::-1]
 
     # Step 2: Determine threshold using the top 100 barcodes
