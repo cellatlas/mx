@@ -16,7 +16,7 @@ def setup_mx_filter_args(parser):
     parser_filter.add_argument(
         "-t",
         "--tool",
-        default="probabilistic",
+        default="bustools",
         type=str,
         help="Tool to use for filtering",
     )
