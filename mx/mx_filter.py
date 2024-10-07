@@ -168,7 +168,7 @@ def run_mx_filter_bustools(
     select_axis=None,  # if you want to do the knee only on certain columns
 ):
     # read matrix
-    mtx = mmread(matrix_fn)
+    mtx = mmread(matrix_fn).tocsr()
 
     # read barcodes
     axis_data = []
