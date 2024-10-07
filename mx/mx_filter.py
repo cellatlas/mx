@@ -194,7 +194,7 @@ def mx_filter_bustools(mtx, axis_data, sum_axis, comps, select_axis):
     # Step 2: Determine threshold using the top 100 barcodes
     M = 10  # Using top 10 barcodes to determine the threshold
     ERROR_RATE = 0.01  # Error rate as defined in the C++ code
-    bclen = 12  # Assuming a UMI length of 12, modify according to your dataset
+    bclen = 8  # Assuming a UMI length of 8, modify according to your dataset
 
     # Get the top M barcode counts
     top_m_counts = s_sort[:M]
