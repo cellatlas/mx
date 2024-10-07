@@ -205,6 +205,7 @@ def mx_filter_bustools(mtx, axis_data, sum_axis, comps, select_axis):
     mask = s > threshold
     mtx_f = mtx[mask]
     axis_data_f = np.array(axis_data)[mask]
+    print(f"Filtered to {mask.sum():,.0f} cells with at least {threshold:,.0f} UMIs.")
     return (mtx_f, axis_data_f)
 
 def mx_filter(mtx, axis_data, sum_axis, comps, select_axis):
