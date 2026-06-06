@@ -1541,8 +1541,8 @@ def setup_mx_assign_args(parser):
         "--ec",
         default=None,
         type=str,
-        required=True,
-        help="Output path for bcs.txt",
+        required=False,
+        help="Path to the marker ec file (required for --assign em)",
     )
 
     parser_assign.add_argument(
@@ -1555,12 +1555,42 @@ def setup_mx_assign_args(parser):
     )
 
     parser_assign.add_argument(
+        "-a",
+        "--assign",
+        default="em",
+        choices=["em", "centroid"],
+        help="Assignment method: 'em' (default) runs the marker-constrained Gaussian "
+        "mixture; 'centroid' builds a centroid per cell type from a labelled reference "
+        "and assigns each cell to the nearest centroid (cosine).",
+    )
+    parser_assign.add_argument(
+        "-r",
+        "--reference",
+        default=None,
+        type=str,
+        help="Path to reference matrix.mtx (cells x genes, same gene order as the "
+        "input matrix). Required for --assign centroid.",
+    )
+    parser_assign.add_argument(
+        "-rl",
+        "--reference-labels",
+        default=None,
+        type=str,
+        help="Single-column file of cell-type labels, one per reference barcode "
+        "(values must match groups.txt). Required for --assign centroid.",
+    )
+
+    parser_assign.add_argument(
         "matrix", metavar="matrix.mtx", type=str, help="Path to matrix.mtx file"
     )
     return parser_assign
 
 
 def validate_mx_assign_args(parser, args):
+    if args.assign == "em" and args.ec is None:
+        parser.error("--assign em requires -e/--ec (the marker ec file)")
+    if args.assign == "centroid" and (args.reference is None or args.reference_labels is None):
+        parser.error("--assign centroid requires -r/--reference and -rl/--reference-labels")
     run_mx_assign(
         args.matrix,
         args.bcs_in,
@@ -1568,6 +1598,9 @@ def validate_mx_assign_args(parser, args):
         args.ec,
         args.groups,
         args.output,
+        assign=args.assign,
+        reference_fn=args.reference,
+        reference_labels_fn=args.reference_labels,
     )
 
 
@@ -1674,11 +1707,52 @@ def mx_assign(G, barcodes, genes, groups, markers_ec):
     return (df, means)
 
 
+def mx_assign_centroid(G, barcodes, genes, groups, Gref, ref_labels):
+    """Label-anchored nearest-centroid assignment.
+
+    Build one centroid per cell type from the labelled reference (the mean
+    expression of its reference cells), then assign each query cell to the cell
+    type whose centroid is most similar (cosine). Unlike the Gaussian-mixture
+    `mx_assign`, this uses the reference labels directly and runs no EM, which
+    avoids the component collapse that the unsupervised mixture suffers on
+    transcriptionally overlapping cell types.
+    """
+    ref_labels = np.asarray(ref_labels).astype(str)
+    n_features = G.shape[1]
+    centroids = np.zeros((len(groups), n_features))
+    for i, g in enumerate(groups):
+        mask = ref_labels == str(g)
+        if mask.any():
+            centroids[i] = Gref[mask].mean(axis=0)
+
+    def _l2norm(M):
+        return M / np.clip(np.linalg.norm(M, axis=1, keepdims=True), 1e-9, None)
+
+    sims = _l2norm(G) @ _l2norm(centroids).T  # (n_cells, n_groups), cosine
+    label_ids = sims.argmax(axis=1)
+    labels = [groups[i] for i in label_ids]
+
+    df = pd.DataFrame(
+        {"label_id": label_ids, "label": labels, "score": sims.max(axis=1)},
+        index=barcodes,
+    )
+    df.index.name = "barcodes"
+    return df
+
+
 from collections import defaultdict
 
 
 def run_mx_assign(
-    matrix_fn, barcodes_fn, genes_fn, markers_ec_fn, groups_fn, assignments_out_fn
+    matrix_fn,
+    barcodes_fn,
+    genes_fn,
+    markers_ec_fn,
+    groups_fn,
+    assignments_out_fn,
+    assign="em",
+    reference_fn=None,
+    reference_labels_fn=None,
 ):
     # mx assign assumes matrix has been filtered and that genes are ordered by their numbering in matrix_ec
     groups = []
@@ -1690,11 +1764,29 @@ def run_mx_assign(
     barcodes = []
     read_str_list(barcodes_fn, barcodes)
 
-    markers_ec = defaultdict(list)
-    read_markers_ec(markers_ec_fn, markers_ec)
-
     # read in gene count matrix
     G = mmread(matrix_fn).toarray()
+
+    if assign == "centroid":
+        # reference matrix (same gene columns as G) + per-cell label
+        Gref = mmread(reference_fn).toarray()
+        ref_labels = []
+        read_str_list(reference_labels_fn, ref_labels)
+        if Gref.shape[1] != G.shape[1]:
+            raise ValueError(
+                f"reference has {Gref.shape[1]} genes but matrix has {G.shape[1]}; "
+                "they must share the same gene columns"
+            )
+        if len(ref_labels) != Gref.shape[0]:
+            raise ValueError(
+                f"{len(ref_labels)} reference labels but reference has {Gref.shape[0]} cells"
+            )
+        df = mx_assign_centroid(G, barcodes, genes, groups, Gref, ref_labels)
+        df.to_csv(assignments_out_fn, sep="\t")
+        return
+
+    markers_ec = defaultdict(list)
+    read_markers_ec(markers_ec_fn, markers_ec)
 
     df, means = mx_assign(G, barcodes, genes, groups, markers_ec)
     df.label.name = "bcs"
