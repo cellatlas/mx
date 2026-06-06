@@ -48,16 +48,27 @@ optional arguments:
 
 ### `mx assign`: Run assignment algorithm
 
-Run a modified Gaussian Mixture model to assign cells to cell types defined in a markers.txt file.
+Assign cells to cell types. Two methods are available via `-a/--assign`:
+
+- `em` (default): a modified, marker-constrained Gaussian Mixture model defined by a markers `ec` file (the original behaviour).
+- `centroid`: build a centroid for each cell type from a **labelled reference** and assign each cell to the nearest centroid (cosine similarity). This runs no EM and uses the reference labels directly, which avoids the mixture-component collapse the unsupervised `em` method can suffer on transcriptionally overlapping cell types (e.g. closely related subtypes).
 
 ```bash
+# em (default): marker-constrained Gaussian mixture
 mx assign -g GROUPS -gi GENES_IN -bi BCS_IN -e EC -o OUTPUT matrix.mtx
+
+# centroid: nearest-centroid against a labelled reference
+mx assign -a centroid -g GROUPS -gi GENES_IN -bi BCS_IN \
+          -r REFERENCE -rl REFERENCE_LABELS -o OUTPUT matrix.mtx
 ```
 
 - `-g GROUPS` is the list of cell types
 - `-gi GENES_IN` is a single column text file containing a list of marker genes (same length as matrix width)
 - `-bi BCS_IN` is a single column text file containing barcodes (same length as matrix length)
-- `-e EC` is the mapping of celltype groups to marker genes in the `ec` format (see [ec](https://github.com/sbooeshaghi/ec/) for more information)
+- `-e EC` is the mapping of celltype groups to marker genes in the `ec` format (see [ec](https://github.com/sbooeshaghi/ec/) for more information). Required for `-a em`.
+- `-a {em,centroid}` selects the assignment method (default `em`)
+- `-r REFERENCE` is a reference `matrix.mtx` (cells x genes, same gene columns as `matrix.mtx`). Required for `-a centroid`.
+- `-rl REFERENCE_LABELS` is a single column text file of cell-type labels, one per reference barcode (values must match `GROUPS`). Required for `-a centroid`.
 - `-o OUTPUT` is a path to save the output file for the assignments (one per barcode)
 - `matrix.mtx` path to sparse matrix file
 
@@ -65,6 +76,8 @@ mx assign -g GROUPS -gi GENES_IN -bi BCS_IN -e EC -o OUTPUT matrix.mtx
 
 ```bash
 $ mx assign -g groups.txt -gi genes.txt -bi barcodes.txt -e matrix.ec -o assignments.txt matrix.mtx
+$ mx assign -a centroid -g groups.txt -gi genes.txt -bi barcodes.txt \
+            -r reference.mtx -rl reference_labels.txt -o assignments.txt matrix.mtx
 ```
 
 ### `mx clean`: Drop rows/cols with all zeros
